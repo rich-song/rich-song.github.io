@@ -212,6 +212,37 @@ canvas{width:100%!important;height:100%!important}
 <hr style="border:none;border-top:2px solid rgba(139,105,20,.3);margin:12px 0">
 
 <h2>Your Strategy</h2>
+<div style="margin-bottom:10px">
+<label style="font-size:.82em;color:var(--text2);font-weight:600">Load Template:</label>
+<select id="templateSelect" style="width:auto;display:inline-block;margin-left:6px;min-width:200px">
+<option value="">— Custom —</option>
+<optgroup label="Beginner">
+<option value="conservative">Conservative Pass Line ($200, $5, 2x odds)</option>
+<option value="beginner68">Beginner 6 & 8 ($200, $5, no press)</option>
+</optgroup>
+<optgroup label="Low House Edge">
+<option value="threePtMolly">3-Point Molly ($300, $10, 3x odds)</option>
+<option value="dpLayOdds">Dark Side Grinder ($500, $10, 5x odds)</option>
+<option value="maxOdds">Max Odds Warrior ($500, $10, 10x odds)</option>
+</optgroup>
+<optgroup label="Place Bet Strategies">
+<option value="inside">Inside Numbers ($300, $10, half press)</option>
+<option value="ironCross">Iron Cross ($300, $10, no press)</option>
+<option value="press68">Press 6 & 8 ($200, $6, full press, down@3)</option>
+<option value="across">Across the Board ($500, $10, half press)</option>
+</optgroup>
+<optgroup label="Aggressive">
+<option value="powerPresser">Power Presser ($500, $10, power press, down@3)</option>
+<option value="shooterChaser">Shooter Chaser ($300, $10, full press)</option>
+<option value="allInDegen">All-In Degen ($200, $5, everything on)</option>
+</optgroup>
+<optgroup label="Bonus Hunters">
+<option value="atsHunter">ATS Hunter ($300, $10, pass+odds+ATS)</option>
+<option value="hardwayHero">Hardway Hero ($200, $5, pass+hardways, half press)</option>
+<option value="propGambler">Prop Gambler ($200, $5, horn+C&E+yo)</option>
+</optgroup>
+</select>
+</div>
 <div class="strat-inline">
 <div class="field"><label>Your Name</label><input type="text" id="gName" value="Player" maxlength="20" style="width:130px"></div>
 <div class="field"><label>Bankroll ($)</label><input type="number" id="gBankroll" value="200" min="5" style="width:90px"></div>
@@ -258,6 +289,13 @@ canvas{width:100%!important;height:100%!important}
 <label><input type="checkbox" id="g-aces"> Aces/2 (30:1)</label>
 <label><input type="checkbox" id="g-midnight"> Midnight/12 (30:1)</label>
 </div>
+<h3 style="margin-top:6px;color:var(--accent2)">ATS (All-Tall-Small) Bonus</h3>
+<div class="strat-row">
+<label><input type="checkbox" id="g-atsSmall"> Small (2-6, pays 34:1)</label>
+<label><input type="checkbox" id="g-atsTall"> Tall (8-12, pays 34:1)</label>
+<label><input type="checkbox" id="g-atsAll"> All (2-12 except 7, pays 175:1)</label>
+</div>
+<div style="font-size:.72em;color:var(--text2);margin:2px 0 4px">ATS bets track numbers hit across entire shooter turn. Placed on come-out, win when all numbers in group are hit, lose on 7-out.</div>
 <h3 style="margin-top:6px;color:var(--accent2)">Bet Controls</h3>
 <div class="strat-row" style="align-items:center">
 <label><input type="checkbox" id="g-offOnComeout" checked> Place/Hardways OFF on come-out</label>
@@ -319,7 +357,7 @@ canvas{width:100%!important;height:100%!important}
 const SHEET_ID='1uj4SA8HTv6Y4evQ7FeARM-yCt9ZRQkCxC6XPskFEaQs';
 const FORM_URL='https://docs.google.com/forms/d/e/1FAIpQLSfLRAd3toys0BuqVp5ib0czjpMFWdOJN0EAUhuqdFePuyEGcA/formResponse';
 const FORM_FIELDS={roomCode:'entry.1970828205',playerName:'entry.1038658274',strategy:'entry.870414517',bankrollStart:'entry.1603024685',bankrollEnd:'entry.1569869403',netPL:'entry.252585777',winRate:'entry.2128141216',peak:'entry.74908948',low:'entry.187168067'};
-const BET_KEYS=['pass','dontpass','passodds','dontpassodds','come','dontcome','place2','place3','place4','place5','place6','place8','place9','place10','place11','place12','field','any7','anyCraps','hard4','hard6','hard8','hard10','horn','ce','yo','aces','midnight'];
+const BET_KEYS=['pass','dontpass','passodds','dontpassodds','come','dontcome','place2','place3','place4','place5','place6','place8','place9','place10','place11','place12','field','any7','anyCraps','hard4','hard6','hard8','hard10','horn','ce','yo','aces','midnight','atsSmall','atsTall','atsAll'];
 const PRESETS_STANDARD={
   pass:{pass:true,label:'Pass Only'},
   passodds:{pass:true,passodds:true,label:'Pass+Odds'},
@@ -330,7 +368,8 @@ const PRESETS_STANDARD={
   degen:{pass:true,passodds:true,come:true,place6:true,place8:true,field:true,any7:true,label:'All-In Degen'},
   hardway:{pass:true,hard6:true,hard8:true,label:'Hardways'},
   hornhigh:{horn:true,yo:true,label:'Horn High'},
-  propmaster:{horn:true,ce:true,yo:true,aces:true,midnight:true,any7:true,anyCraps:true,label:'Prop Master'}
+  propmaster:{horn:true,ce:true,yo:true,aces:true,midnight:true,any7:true,anyCraps:true,label:'Prop Master'},
+  ats:{pass:true,passodds:true,atsSmall:true,atsTall:true,atsAll:true,label:'ATS Bonus'}
 };
 const PRESETS_CRAPLESS={
   pass:{pass:true,label:'Pass Only'},
@@ -342,7 +381,8 @@ const PRESETS_CRAPLESS={
   field:{field:true,label:'Field Warrior'},
   degen:{pass:true,passodds:true,come:true,place6:true,place8:true,place3:true,place11:true,field:true,label:'All-In Degen'},
   hardway:{pass:true,hard6:true,hard8:true,label:'Hardways'},
-  propmaster:{horn:true,ce:true,yo:true,aces:true,midnight:true,any7:true,anyCraps:true,label:'Prop Master'}
+  propmaster:{horn:true,ce:true,yo:true,aces:true,midnight:true,any7:true,anyCraps:true,label:'Prop Master'},
+  ats:{pass:true,passodds:true,atsSmall:true,atsTall:true,atsAll:true,label:'ATS Bonus'}
 };
 
 let gameMode='standard'; // 'standard' or 'crapless'
@@ -448,6 +488,10 @@ function renderOddsRef(){
     <tr><td>Yo (Eleven)</td><td>15:1</td><td>11.11%</td></tr>
     <tr><td>Aces (Snake Eyes)</td><td>30:1</td><td>13.89%</td></tr>
     <tr><td>Midnight (Boxcars)</td><td>30:1</td><td>13.89%</td></tr>
+    <tr style="border-top:2px solid var(--border)"><td colspan="3" style="color:var(--accent2);font-weight:600;padding-top:8px">ATS (All-Tall-Small)</td></tr>
+    <tr><td>Small (2-3-4-5-6)</td><td>34:1</td><td>7.76%</td></tr>
+    <tr><td>Tall (8-9-10-11-12)</td><td>34:1</td><td>7.76%</td></tr>
+    <tr><td>All (2 thru 12, no 7)</td><td>175:1</td><td>7.76%</td></tr>
     </tbody></table>
     <table class="odds-table" style="margin-top:8px">
     <thead><tr><th>Point</th><th>Pass Odds</th><th>Don't Pass Odds</th></tr></thead>
@@ -481,6 +525,10 @@ function renderOddsRef(){
     <tr><td>Yo (Eleven)</td><td>15:1</td><td>11.11%</td></tr>
     <tr><td>Aces (Snake Eyes)</td><td>30:1</td><td>13.89%</td></tr>
     <tr><td>Midnight (Boxcars)</td><td>30:1</td><td>13.89%</td></tr>
+    <tr style="border-top:2px solid var(--border)"><td colspan="3" style="color:var(--accent2);font-weight:600;padding-top:8px">ATS (All-Tall-Small)</td></tr>
+    <tr><td>Small (2-3-4-5-6)</td><td>34:1</td><td>7.76%</td></tr>
+    <tr><td>Tall (8-9-10-11-12)</td><td>34:1</td><td>7.76%</td></tr>
+    <tr><td>All (2 thru 12, no 7)</td><td>175:1</td><td>7.76%</td></tr>
     </tbody></table>
     <table class="odds-table" style="margin-top:8px">
     <thead><tr><th>Point</th><th>Pass Odds Pay</th></tr></thead>
@@ -859,6 +907,10 @@ function runSimulation(){
     if(strat.yo){pending.push({t:'yo',a:baseBet});need+=baseBet;}
     if(strat.aces){pending.push({t:'aces',a:baseBet});need+=baseBet;}
     if(strat.midnight){pending.push({t:'midnight',a:baseBet});need+=baseBet;}
+    // ATS bets: placed on come-out, track numbers across shooter's turn
+    if(strat.atsSmall&&phase==='comeout'&&!activeBets.find(b=>b.t==='atsSmall')){pending.push({t:'atsSmall',a:baseBet,hits:new Set()});need+=baseBet;}
+    if(strat.atsTall&&phase==='comeout'&&!activeBets.find(b=>b.t==='atsTall')){pending.push({t:'atsTall',a:baseBet,hits:new Set()});need+=baseBet;}
+    if(strat.atsAll&&phase==='comeout'&&!activeBets.find(b=>b.t==='atsAll')){pending.push({t:'atsAll',a:baseBet,hits:new Set()});need+=baseBet;}
     if(need>bankroll)break;
     pending.forEach(b=>{bankroll-=b.a;activeBets.push(b);});
 
@@ -1014,6 +1066,12 @@ function runSimulation(){
       if(b.t==='yo'){if(total===11)net+=b.a+b.a*15;rm.push(i);}
       if(b.t==='aces'){if(total===2)net+=b.a+b.a*30;rm.push(i);}
       if(b.t==='midnight'){if(total===12)net+=b.a+b.a*30;rm.push(i);}
+      // ATS Small: track 2,3,4,5,6. Win all = 34:1. 7-out = lose.
+      if(b.t==='atsSmall'){if(total!==7&&[2,3,4,5,6].includes(total))b.hits.add(total);if(b.hits.size===5){net+=b.a+b.a*34;rm.push(i);}else if(total===7)rm.push(i);}
+      // ATS Tall: track 8,9,10,11,12. Win all = 34:1. 7-out = lose.
+      if(b.t==='atsTall'){if(total!==7&&[8,9,10,11,12].includes(total))b.hits.add(total);if(b.hits.size===5){net+=b.a+b.a*34;rm.push(i);}else if(total===7)rm.push(i);}
+      // ATS All: track 2-6,8-12. Win all = 175:1. 7-out = lose.
+      if(b.t==='atsAll'){if(total!==7&&total>=2&&total<=12&&total!==7)b.hits.add(total);if(b.hits.size===10){net+=b.a+b.a*175;rm.push(i);}else if(total===7)rm.push(i);}
     });
     rm.sort((a,b)=>b-a).forEach(i=>activeBets.splice(i,1));
     bankroll+=net;
@@ -1070,6 +1128,7 @@ function strategyLabel(s){
   if(s.field)p.push('Field');if(s.any7)p.push('Any7');if(s.anyCraps)p.push('AnyCraps');
   if(s.hard4)p.push('H4');if(s.hard6)p.push('H6');if(s.hard8)p.push('H8');if(s.hard10)p.push('H10');
   if(s.horn)p.push('Horn');if(s.ce)p.push('C&E');if(s.yo)p.push('Yo');if(s.aces)p.push('Aces');if(s.midnight)p.push('12');
+  if(s.atsSmall)p.push('Small');if(s.atsTall)p.push('Tall');if(s.atsAll)p.push('All');
   let lbl='$'+s.base+' '+p.join('+');
   if(s.press&&s.press!=='none')lbl+=' ['+s.press+'Press]';
   if(s.takeDown>0)lbl+=' [down@'+s.takeDown+']';
@@ -1166,6 +1225,37 @@ function renderDist(counts,total){
   }
   $('rollDist').innerHTML=html;
 }
+
+// ─── STRATEGY TEMPLATES ───
+const TEMPLATES={
+  conservative:{bankroll:200,bet:5,odds:'2',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true}},
+  beginner68:{bankroll:200,bet:5,odds:'1',press:'none',takeDown:'0',offCO:true,bets:{pass:true,place6:true,place8:true}},
+  threePtMolly:{bankroll:300,bet:10,odds:'3',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,come:true}},
+  dpLayOdds:{bankroll:500,bet:10,odds:'5',press:'none',takeDown:'0',offCO:true,bets:{dontpass:true,dontpassodds:true}},
+  maxOdds:{bankroll:500,bet:10,odds:'10',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true}},
+  inside:{bankroll:300,bet:10,odds:'2',press:'half',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place5:true,place6:true,place8:true,place9:true}},
+  ironCross:{bankroll:300,bet:10,odds:'2',press:'none',takeDown:'0',offCO:true,bets:{place5:true,place6:true,place8:true,field:true}},
+  press68:{bankroll:200,bet:6,odds:'2',press:'full',takeDown:'3',offCO:true,bets:{pass:true,passodds:true,place6:true,place8:true}},
+  across:{bankroll:500,bet:10,odds:'2',press:'half',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place4:true,place5:true,place6:true,place8:true,place9:true,place10:true}},
+  powerPresser:{bankroll:500,bet:10,odds:'3',press:'power',takeDown:'3',offCO:true,bets:{pass:true,passodds:true,place6:true,place8:true}},
+  shooterChaser:{bankroll:300,bet:10,odds:'3',press:'full',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place5:true,place6:true,place8:true,place9:true,hard6:true,hard8:true}},
+  allInDegen:{bankroll:200,bet:5,odds:'3',press:'none',takeDown:'0',offCO:false,bets:{pass:true,passodds:true,come:true,place6:true,place8:true,field:true,any7:true,horn:true}},
+  atsHunter:{bankroll:300,bet:10,odds:'3',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,atsSmall:true,atsTall:true,atsAll:true}},
+  hardwayHero:{bankroll:200,bet:5,odds:'2',press:'half',takeDown:'0',offCO:false,bets:{pass:true,passodds:true,hard4:true,hard6:true,hard8:true,hard10:true}},
+  propGambler:{bankroll:200,bet:5,odds:'1',press:'none',takeDown:'0',offCO:true,bets:{horn:true,ce:true,yo:true,aces:true,midnight:true}}
+};
+
+$('templateSelect').addEventListener('change',function(){
+  const t=TEMPLATES[this.value];
+  if(!t){return;}
+  $('gBankroll').value=t.bankroll;
+  $('gBet').value=t.bet;
+  $('gOdds').value=t.odds;
+  $('gPress').value=t.press;
+  $('gTakeDown').value=t.takeDown;
+  $('g-offOnComeout').checked=t.offCO;
+  BET_KEYS.forEach(k=>{const el=$('g-'+k);if(el)el.checked=!!t.bets[k];});
+});
 
 // ─── EVENTS ───
 $('runBtn').addEventListener('click',runSimulation);
