@@ -76,6 +76,24 @@ input[type="checkbox"]{width:auto;margin-right:4px}
 .preset-bar{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
 .preset-btn{padding:4px 10px;font-size:.76em;border-radius:4px;border:1px solid rgba(139,105,20,.4);background:rgba(0,0,0,.3);color:var(--text2);cursor:pointer;font-family:'Georgia',serif}
 .preset-btn:hover{border-color:var(--gold);color:var(--gold);box-shadow:0 0 8px rgba(255,215,0,.15)}
+.tpl-section{margin-bottom:10px}
+.tpl-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:6px 0}
+.tpl-header h3{font-size:.92em;color:var(--gold);margin:0;font-variant:small-caps;letter-spacing:1px}
+.tpl-arrow{color:var(--text2);font-size:.8em;transition:transform .2s}
+.tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin-top:6px;max-height:0;overflow:hidden;transition:max-height .3s ease,opacity .3s ease;opacity:0}
+.tpl-grid.open{max-height:800px;opacity:1}
+.tpl-card{background:linear-gradient(135deg,rgba(0,0,0,.4),rgba(0,0,0,.25));border:1px solid rgba(139,105,20,.35);border-radius:10px;padding:10px 12px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.tpl-card:hover{border-color:var(--gold);box-shadow:0 0 12px rgba(255,215,0,.2);transform:translateY(-1px)}
+.tpl-card.active{border-color:var(--gold);background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(0,0,0,.3));box-shadow:0 0 15px rgba(255,215,0,.25)}
+.tpl-name{font-size:.82em;font-weight:700;color:var(--text);margin-bottom:3px;font-family:'Georgia',serif}
+.tpl-desc{font-size:.68em;color:var(--text2);line-height:1.3;margin-bottom:5px}
+.tpl-tags{display:flex;flex-wrap:wrap;gap:3px}
+.tpl-tag{font-size:.62em;padding:1px 5px;border-radius:3px;font-family:'Georgia',serif}
+.tpl-tag.money{background:rgba(78,203,113,.15);color:var(--green)}
+.tpl-tag.risk-low{background:rgba(78,203,113,.15);color:#6be88e}
+.tpl-tag.risk-med{background:rgba(255,189,57,.15);color:#ffbd39}
+.tpl-tag.risk-high{background:rgba(233,69,96,.15);color:var(--red)}
+.tpl-tag.mechanic{background:rgba(255,215,0,.1);color:var(--gold)}
 .strat-inline{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
 .strat-inline .field{display:flex;flex-direction:column;gap:2px}
 .strat-inline .field label{margin:0;font-size:.78em}
@@ -212,37 +230,7 @@ canvas{width:100%!important;height:100%!important}
 <hr style="border:none;border-top:2px solid rgba(139,105,20,.3);margin:12px 0">
 
 <h2>Your Strategy</h2>
-<div style="margin-bottom:10px">
-<label style="font-size:.82em;color:var(--text2);font-weight:600">Load Template:</label>
-<select id="templateSelect" style="width:auto;display:inline-block;margin-left:6px;min-width:200px">
-<option value="">— Custom —</option>
-<optgroup label="Beginner">
-<option value="conservative">Conservative Pass Line ($200, $5, 2x odds)</option>
-<option value="beginner68">Beginner 6 & 8 ($200, $5, no press)</option>
-</optgroup>
-<optgroup label="Low House Edge">
-<option value="threePtMolly">3-Point Molly ($300, $10, 3x odds)</option>
-<option value="dpLayOdds">Dark Side Grinder ($500, $10, 5x odds)</option>
-<option value="maxOdds">Max Odds Warrior ($500, $10, 10x odds)</option>
-</optgroup>
-<optgroup label="Place Bet Strategies">
-<option value="inside">Inside Numbers ($300, $10, half press)</option>
-<option value="ironCross">Iron Cross ($300, $10, no press)</option>
-<option value="press68">Press 6 & 8 ($200, $6, full press, down@3)</option>
-<option value="across">Across the Board ($500, $10, half press)</option>
-</optgroup>
-<optgroup label="Aggressive">
-<option value="powerPresser">Power Presser ($500, $10, power press, down@3)</option>
-<option value="shooterChaser">Shooter Chaser ($300, $10, full press)</option>
-<option value="allInDegen">All-In Degen ($200, $5, everything on)</option>
-</optgroup>
-<optgroup label="Bonus Hunters">
-<option value="atsHunter">ATS Hunter ($300, $10, pass+odds+ATS)</option>
-<option value="hardwayHero">Hardway Hero ($200, $5, pass+hardways, half press)</option>
-<option value="propGambler">Prop Gambler ($200, $5, horn+C&E+yo)</option>
-</optgroup>
-</select>
-</div>
+<div id="templateCards"></div>
 <div class="strat-inline">
 <div class="field"><label>Your Name</label><input type="text" id="gName" value="Player" maxlength="20" style="width:130px"></div>
 <div class="field"><label>Bankroll ($)</label><input type="number" id="gBankroll" value="200" min="5" style="width:90px"></div>
@@ -1227,35 +1215,83 @@ function renderDist(counts,total){
 }
 
 // ─── STRATEGY TEMPLATES ───
-const TEMPLATES={
-  conservative:{bankroll:200,bet:5,odds:'2',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true}},
-  beginner68:{bankroll:200,bet:5,odds:'1',press:'none',takeDown:'0',offCO:true,bets:{pass:true,place6:true,place8:true}},
-  threePtMolly:{bankroll:300,bet:10,odds:'3',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,come:true}},
-  dpLayOdds:{bankroll:500,bet:10,odds:'5',press:'none',takeDown:'0',offCO:true,bets:{dontpass:true,dontpassodds:true}},
-  maxOdds:{bankroll:500,bet:10,odds:'10',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true}},
-  inside:{bankroll:300,bet:10,odds:'2',press:'half',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place5:true,place6:true,place8:true,place9:true}},
-  ironCross:{bankroll:300,bet:10,odds:'2',press:'none',takeDown:'0',offCO:true,bets:{place5:true,place6:true,place8:true,field:true}},
-  press68:{bankroll:200,bet:6,odds:'2',press:'full',takeDown:'3',offCO:true,bets:{pass:true,passodds:true,place6:true,place8:true}},
-  across:{bankroll:500,bet:10,odds:'2',press:'half',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place4:true,place5:true,place6:true,place8:true,place9:true,place10:true}},
-  powerPresser:{bankroll:500,bet:10,odds:'3',press:'power',takeDown:'3',offCO:true,bets:{pass:true,passodds:true,place6:true,place8:true}},
-  shooterChaser:{bankroll:300,bet:10,odds:'3',press:'full',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place5:true,place6:true,place8:true,place9:true,hard6:true,hard8:true}},
-  allInDegen:{bankroll:200,bet:5,odds:'3',press:'none',takeDown:'0',offCO:false,bets:{pass:true,passodds:true,come:true,place6:true,place8:true,field:true,any7:true,horn:true}},
-  atsHunter:{bankroll:300,bet:10,odds:'3',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,atsSmall:true,atsTall:true,atsAll:true}},
-  hardwayHero:{bankroll:200,bet:5,odds:'2',press:'half',takeDown:'0',offCO:false,bets:{pass:true,passodds:true,hard4:true,hard6:true,hard8:true,hard10:true}},
-  propGambler:{bankroll:200,bet:5,odds:'1',press:'none',takeDown:'0',offCO:true,bets:{horn:true,ce:true,yo:true,aces:true,midnight:true}}
-};
+const TEMPLATE_GROUPS=[
+  {label:'Beginner',items:[
+    {key:'conservative',name:'Conservative Pass',desc:'Pass line with modest odds. Lowest house edge, steady play.',risk:'low',bankroll:200,bet:5,odds:'2',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true}},
+    {key:'beginner68',name:'Beginner 6 & 8',desc:'Pass plus the two most frequent place numbers.',risk:'low',bankroll:200,bet:5,odds:'1',press:'none',takeDown:'0',offCO:true,bets:{pass:true,place6:true,place8:true}}
+  ]},
+  {label:'Low House Edge',items:[
+    {key:'threePtMolly',name:'3-Point Molly',desc:'Pass + odds + come bet. Always three numbers working.',risk:'low',bankroll:300,bet:10,odds:'3',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,come:true}},
+    {key:'dpLayOdds',name:'Dark Side Grinder',desc:"Don't pass with max lay odds. Bet against the shooter.",risk:'low',bankroll:500,bet:10,odds:'5',press:'none',takeDown:'0',offCO:true,bets:{dontpass:true,dontpassodds:true}},
+    {key:'maxOdds',name:'Max Odds Warrior',desc:'Pass line with 10x odds. Big swings, zero edge on odds.',risk:'med',bankroll:500,bet:10,odds:'10',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true}}
+  ]},
+  {label:'Place Bet Strategies',items:[
+    {key:'inside',name:'Inside Numbers',desc:'Place 5, 6, 8, 9 with half press. Frequent hits.',risk:'med',bankroll:300,bet:10,odds:'2',press:'half',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place5:true,place6:true,place8:true,place9:true}},
+    {key:'ironCross',name:'Iron Cross',desc:'Place 5, 6, 8 + field. Win on everything except 7.',risk:'med',bankroll:300,bet:10,odds:'2',press:'none',takeDown:'0',offCO:true,bets:{place5:true,place6:true,place8:true,field:true}},
+    {key:'press68',name:'Press 6 & 8',desc:'Full press on 6 & 8, take down after 3 wins.',risk:'med',bankroll:200,bet:6,odds:'2',press:'full',takeDown:'3',offCO:true,bets:{pass:true,passodds:true,place6:true,place8:true}},
+    {key:'across',name:'Across the Board',desc:'All six place numbers with half press. Maximum coverage.',risk:'med',bankroll:500,bet:10,odds:'2',press:'half',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place4:true,place5:true,place6:true,place8:true,place9:true,place10:true}}
+  ]},
+  {label:'Aggressive',items:[
+    {key:'powerPresser',name:'Power Presser',desc:'Power press (3x) on 6 & 8 with take-down at 3 wins.',risk:'high',bankroll:500,bet:10,odds:'3',press:'power',takeDown:'3',offCO:true,bets:{pass:true,passodds:true,place6:true,place8:true}},
+    {key:'shooterChaser',name:'Shooter Chaser',desc:'Inside numbers + hardways, full press. Ride hot shooters.',risk:'high',bankroll:300,bet:10,odds:'3',press:'full',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place5:true,place6:true,place8:true,place9:true,hard6:true,hard8:true}},
+    {key:'allInDegen',name:'All-In Degen',desc:'Everything on, bets working on come-out. Pure chaos.',risk:'high',bankroll:200,bet:5,odds:'3',press:'none',takeDown:'0',offCO:false,bets:{pass:true,passodds:true,come:true,place6:true,place8:true,field:true,any7:true,horn:true}}
+  ]},
+  {label:'Bonus Hunters',items:[
+    {key:'atsHunter',name:'ATS Hunter',desc:'Pass + odds + all three ATS bets. Chase the bonus.',risk:'med',bankroll:300,bet:10,odds:'3',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,atsSmall:true,atsTall:true,atsAll:true}},
+    {key:'hardwayHero',name:'Hardway Hero',desc:'Pass + all four hardways with half press.',risk:'high',bankroll:200,bet:5,odds:'2',press:'half',takeDown:'0',offCO:false,bets:{pass:true,passodds:true,hard4:true,hard6:true,hard8:true,hard10:true}},
+    {key:'propGambler',name:'Prop Gambler',desc:'Horn, C&E, yo, aces, midnight. High risk, high reward.',risk:'high',bankroll:200,bet:5,odds:'1',press:'none',takeDown:'0',offCO:true,bets:{horn:true,ce:true,yo:true,aces:true,midnight:true}}
+  ]}
+];
 
-$('templateSelect').addEventListener('change',function(){
-  const t=TEMPLATES[this.value];
-  if(!t){return;}
-  $('gBankroll').value=t.bankroll;
-  $('gBet').value=t.bet;
-  $('gOdds').value=t.odds;
-  $('gPress').value=t.press;
-  $('gTakeDown').value=t.takeDown;
-  $('g-offOnComeout').checked=t.offCO;
-  BET_KEYS.forEach(k=>{const el=$('g-'+k);if(el)el.checked=!!t.bets[k];});
-});
+let activeTemplate=null;
+
+function renderTemplateCards(){
+  const container=$('templateCards');
+  const riskLabel={low:'Low Risk',med:'Medium',high:'High Risk'};
+  let html='';
+  TEMPLATE_GROUPS.forEach((g,gi)=>{
+    const isFirst=gi===0;
+    html+=`<div class="tpl-section"><div class="tpl-header" data-tg="${gi}"><h3>${g.label}</h3><span class="tpl-arrow">${isFirst?'&#9650;':'&#9660;'}</span></div><div class="tpl-grid${isFirst?' open':''}" id="tplGrid${gi}">`;
+    g.items.forEach(t=>{
+      const pressLbl=t.press==='none'?'':t.press==='half'?'Half Press':t.press==='full'?'Full Press':'Power Press';
+      html+=`<div class="tpl-card${activeTemplate===t.key?' active':''}" data-tpl="${t.key}">
+        <div class="tpl-name">${t.name}</div>
+        <div class="tpl-desc">${t.desc}</div>
+        <div class="tpl-tags">
+          <span class="tpl-tag money">$${t.bankroll} / $${t.bet}</span>
+          <span class="tpl-tag risk-${t.risk}">${riskLabel[t.risk]}</span>
+          ${t.odds!=='1'?`<span class="tpl-tag mechanic">${t.odds}x odds</span>`:''}
+          ${pressLbl?`<span class="tpl-tag mechanic">${pressLbl}</span>`:''}
+        </div></div>`;
+    });
+    html+=`</div></div>`;
+  });
+  container.innerHTML=html;
+  // Section toggle
+  container.querySelectorAll('.tpl-header').forEach(h=>h.addEventListener('click',()=>{
+    const grid=$('tplGrid'+h.dataset.tg);
+    const arrow=h.querySelector('.tpl-arrow');
+    grid.classList.toggle('open');
+    arrow.innerHTML=grid.classList.contains('open')?'&#9650;':'&#9660;';
+  }));
+  // Card click
+  container.querySelectorAll('.tpl-card').forEach(card=>card.addEventListener('click',()=>{
+    const key=card.dataset.tpl;
+    let t=null;
+    for(const g of TEMPLATE_GROUPS)for(const item of g.items)if(item.key===key){t=item;break;}
+    if(!t)return;
+    activeTemplate=key;
+    container.querySelectorAll('.tpl-card').forEach(c=>c.classList.remove('active'));
+    card.classList.add('active');
+    $('gBankroll').value=t.bankroll;
+    $('gBet').value=t.bet;
+    $('gOdds').value=t.odds;
+    $('gPress').value=t.press;
+    $('gTakeDown').value=t.takeDown;
+    $('g-offOnComeout').checked=t.offCO;
+    BET_KEYS.forEach(k=>{const el=$('g-'+k);if(el)el.checked=!!t.bets[k];});
+  }));
+}
 
 // ─── EVENTS ───
 $('runBtn').addEventListener('click',runSimulation);
@@ -1291,6 +1327,7 @@ function checkURL(){
 // ─── INIT ───
 renderPresets();
 renderOddsRef();
+renderTemplateCards();
 loadRooms();
 checkURL();
 </script>
