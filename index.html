@@ -79,6 +79,8 @@ input[type="checkbox"]{width:auto;margin-right:4px}
 .tpl-section{margin-bottom:10px}
 .tpl-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:6px 0}
 .tpl-header h3{font-size:.92em;color:var(--gold);margin:0;font-variant:small-caps;letter-spacing:1px}
+.tpl-section:first-child .tpl-header h3{font-size:1em;text-shadow:0 0 10px rgba(255,215,0,.3)}
+.tpl-section:first-child .tpl-card{border-color:rgba(255,215,0,.25)}
 .tpl-arrow{color:var(--text2);font-size:.8em;transition:transform .2s}
 .tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin-top:6px;max-height:0;overflow:hidden;transition:max-height .3s ease,opacity .3s ease;opacity:0}
 .tpl-grid.open{max-height:800px;opacity:1}
@@ -1216,30 +1218,54 @@ function renderDist(counts,total){
 
 // ─── STRATEGY TEMPLATES ───
 const TEMPLATE_GROUPS=[
-  {label:'Beginner',items:[
-    {key:'conservative',name:'Conservative Pass',desc:'Pass line with modest odds. Lowest house edge, steady play.',risk:'low',bankroll:200,bet:5,odds:'2',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true}},
-    {key:'beginner68',name:'Beginner 6 & 8',desc:'Pass plus the two most frequent place numbers.',risk:'low',bankroll:200,bet:5,odds:'1',press:'none',takeDown:'0',offCO:true,bets:{pass:true,place6:true,place8:true}}
+  {label:'\u2B50 Most Popular',items:[
+    {key:'threePtMolly',name:'3-Point Molly',desc:'The gold standard. Pass + odds + come. Always 3 numbers working, lowest combined edge.',risk:'low',bankroll:300,bet:10,odds:'3',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,come:true}},
+    {key:'ironCross',name:'Iron Cross',desc:'Place 5, 6, 8 + field. Wins on every number except 7. A casino classic.',risk:'med',bankroll:300,bet:10,odds:'2',press:'none',takeDown:'0',offCO:true,bets:{place5:true,place6:true,place8:true,field:true}},
+    {key:'press68',name:'Press 6 & 8',desc:'The most popular place strategy. Full press on 6 & 8, take profit after 3 hits.',risk:'med',bankroll:200,bet:6,odds:'2',press:'full',takeDown:'3',offCO:true,bets:{pass:true,passodds:true,place6:true,place8:true}},
+    {key:'dpLayOdds',name:'Dark Side Grinder',desc:"Don't pass with heavy lay odds. The mathematically optimal approach for patient players.",risk:'low',bankroll:500,bet:10,odds:'5',press:'none',takeDown:'0',offCO:true,bets:{dontpass:true,dontpassodds:true}},
+    {key:'inside',name:'$44 Inside',desc:'The classic inside spread: $10 each on 5, 6, 8, 9. Hits on 18 of 36 combos.',risk:'med',bankroll:300,bet:10,odds:'2',press:'half',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place5:true,place6:true,place8:true,place9:true}},
+    {key:'collectPress',name:'Collect & Press',desc:'Alternate: collect one win, press the next. Classic profit-locking rhythm.',risk:'med',bankroll:300,bet:10,odds:'2',press:'half',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place6:true,place8:true}}
+  ]},
+  {label:'Beginner-Friendly',items:[
+    {key:'conservative',name:'Conservative Pass',desc:'Pass line with 2x odds. The simplest, safest bet on the table at 1.41% edge.',risk:'low',bankroll:200,bet:5,odds:'2',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true}},
+    {key:'beginner68',name:'Beginner 6 & 8',desc:'Pass plus place 6 & 8. Only 1.52% edge on places, hit on 10 of 36 rolls.',risk:'low',bankroll:200,bet:6,odds:'1',press:'none',takeDown:'0',offCO:true,bets:{pass:true,place6:true,place8:true}},
+    {key:'passComeCome',name:'Pass + 2 Come',desc:'Build up to 3 numbers naturally. No place bets needed. Pure low-edge play.',risk:'low',bankroll:300,bet:5,odds:'2',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,come:true}},
+    {key:'minPassMax',name:'Min Pass, Max Odds',desc:'$5 pass with 10x odds. Tiny edge on flat, zero edge on $50 odds. Best EV possible.',risk:'med',bankroll:500,bet:5,odds:'10',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true}}
   ]},
   {label:'Low House Edge',items:[
-    {key:'threePtMolly',name:'3-Point Molly',desc:'Pass + odds + come bet. Always three numbers working.',risk:'low',bankroll:300,bet:10,odds:'3',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,come:true}},
-    {key:'dpLayOdds',name:'Dark Side Grinder',desc:"Don't pass with max lay odds. Bet against the shooter.",risk:'low',bankroll:500,bet:10,odds:'5',press:'none',takeDown:'0',offCO:true,bets:{dontpass:true,dontpassodds:true}},
-    {key:'maxOdds',name:'Max Odds Warrior',desc:'Pass line with 10x odds. Big swings, zero edge on odds.',risk:'med',bankroll:500,bet:10,odds:'10',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true}}
+    {key:'doeyDont',name:'Doey-Don\u2019t (Hedge)',desc:'Pass + Don\u2019t Pass together. Cancels come-out, then take full odds on point. Near-zero flat risk.',risk:'low',bankroll:400,bet:10,odds:'5',press:'none',takeDown:'0',offCO:true,bets:{pass:true,dontpass:true,passodds:true}},
+    {key:'maxOdds',name:'Max Odds Warrior',desc:'Pass line with 10x odds. Big swings but zero house edge on the odds portion.',risk:'med',bankroll:500,bet:10,odds:'10',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true}},
+    {key:'dcFortress',name:'Don\u2019t Come Fortress',desc:'Don\u2019t pass + don\u2019t come. Build a wall of don\u2019t bets. Win when the 7 rolls.',risk:'low',bankroll:400,bet:10,odds:'3',press:'none',takeDown:'0',offCO:true,bets:{dontpass:true,dontpassodds:true,dontcome:true}},
+    {key:'place68Only',name:'Place 6 & 8 Only',desc:'Skip the pass line entirely. Place 6 & 8 at just 1.52% edge. Pure and simple.',risk:'low',bankroll:200,bet:6,odds:'1',press:'none',takeDown:'0',offCO:true,bets:{place6:true,place8:true}}
   ]},
   {label:'Place Bet Strategies',items:[
-    {key:'inside',name:'Inside Numbers',desc:'Place 5, 6, 8, 9 with half press. Frequent hits.',risk:'med',bankroll:300,bet:10,odds:'2',press:'half',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place5:true,place6:true,place8:true,place9:true}},
-    {key:'ironCross',name:'Iron Cross',desc:'Place 5, 6, 8 + field. Win on everything except 7.',risk:'med',bankroll:300,bet:10,odds:'2',press:'none',takeDown:'0',offCO:true,bets:{place5:true,place6:true,place8:true,field:true}},
-    {key:'press68',name:'Press 6 & 8',desc:'Full press on 6 & 8, take down after 3 wins.',risk:'med',bankroll:200,bet:6,odds:'2',press:'full',takeDown:'3',offCO:true,bets:{pass:true,passodds:true,place6:true,place8:true}},
-    {key:'across',name:'Across the Board',desc:'All six place numbers with half press. Maximum coverage.',risk:'med',bankroll:500,bet:10,odds:'2',press:'half',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place4:true,place5:true,place6:true,place8:true,place9:true,place10:true}}
+    {key:'regression68',name:'Regress 6 & 8',desc:'Start with $12 each on 6/8, take down to $6 after first hit. Lock in profit early.',risk:'med',bankroll:200,bet:12,odds:'1',press:'none',takeDown:'1',offCO:true,bets:{pass:true,place6:true,place8:true}},
+    {key:'outsideNumbers',name:'Outside Numbers',desc:'Place 4, 5, 9, 10. Skip the popular 6/8 \u2014 higher payouts on the outside.',risk:'med',bankroll:300,bet:10,odds:'2',press:'half',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place4:true,place5:true,place9:true,place10:true}},
+    {key:'across',name:'Across the Board',desc:'All six place numbers. Maximum coverage \u2014 22 of 36 combos hit a winner.',risk:'med',bankroll:500,bet:10,odds:'2',press:'half',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place4:true,place5:true,place6:true,place8:true,place9:true,place10:true}},
+    {key:'sixEightPress',name:'6 & 8 Power Run',desc:'$6 on each, power press every hit. Let it ride for explosive growth.',risk:'high',bankroll:200,bet:6,odds:'1',press:'power',takeDown:'5',offCO:true,bets:{pass:true,place6:true,place8:true}},
+    {key:'insideHalf',name:'Inside Half Press',desc:'Place 5,6,8,9 with half press. Grow bets gradually, pocket some profit each hit.',risk:'med',bankroll:300,bet:10,odds:'2',press:'half',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place5:true,place6:true,place8:true,place9:true}}
   ]},
   {label:'Aggressive',items:[
-    {key:'powerPresser',name:'Power Presser',desc:'Power press (3x) on 6 & 8 with take-down at 3 wins.',risk:'high',bankroll:500,bet:10,odds:'3',press:'power',takeDown:'3',offCO:true,bets:{pass:true,passodds:true,place6:true,place8:true}},
-    {key:'shooterChaser',name:'Shooter Chaser',desc:'Inside numbers + hardways, full press. Ride hot shooters.',risk:'high',bankroll:300,bet:10,odds:'3',press:'full',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place5:true,place6:true,place8:true,place9:true,hard6:true,hard8:true}},
-    {key:'allInDegen',name:'All-In Degen',desc:'Everything on, bets working on come-out. Pure chaos.',risk:'high',bankroll:200,bet:5,odds:'3',press:'none',takeDown:'0',offCO:false,bets:{pass:true,passodds:true,come:true,place6:true,place8:true,field:true,any7:true,horn:true}}
+    {key:'powerPresser',name:'Power Presser',desc:'Power press (3x) on 6 & 8 with take-down at 3 wins. Huge upside on hot rolls.',risk:'high',bankroll:500,bet:10,odds:'3',press:'power',takeDown:'3',offCO:true,bets:{pass:true,passodds:true,place6:true,place8:true}},
+    {key:'shooterChaser',name:'Shooter Chaser',desc:'Inside numbers + hardways, full press. Designed to ride a hot shooter.',risk:'high',bankroll:300,bet:10,odds:'3',press:'full',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place5:true,place6:true,place8:true,place9:true,hard6:true,hard8:true}},
+    {key:'fullSend',name:'Full Send',desc:'Pass + odds + across + hardways + ATS. Working on come-out. Maximum action.',risk:'high',bankroll:500,bet:10,odds:'3',press:'full',takeDown:'0',offCO:false,bets:{pass:true,passodds:true,place4:true,place5:true,place6:true,place8:true,place9:true,place10:true,hard6:true,hard8:true,atsSmall:true,atsTall:true,atsAll:true}},
+    {key:'allInDegen',name:'All-In Degen',desc:'Everything on, bets working on come-out. Pure chaos. YOLO.',risk:'high',bankroll:200,bet:5,odds:'3',press:'none',takeDown:'0',offCO:false,bets:{pass:true,passodds:true,come:true,place6:true,place8:true,field:true,any7:true,horn:true}},
+    {key:'firebet',name:'Fire Bet Chaser',desc:'Pass + max odds + all ATS bets. Swing for the fences on long shooter runs.',risk:'high',bankroll:500,bet:5,odds:'10',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,atsSmall:true,atsTall:true,atsAll:true}}
   ]},
-  {label:'Bonus Hunters',items:[
-    {key:'atsHunter',name:'ATS Hunter',desc:'Pass + odds + all three ATS bets. Chase the bonus.',risk:'med',bankroll:300,bet:10,odds:'3',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,atsSmall:true,atsTall:true,atsAll:true}},
-    {key:'hardwayHero',name:'Hardway Hero',desc:'Pass + all four hardways with half press.',risk:'high',bankroll:200,bet:5,odds:'2',press:'half',takeDown:'0',offCO:false,bets:{pass:true,passodds:true,hard4:true,hard6:true,hard8:true,hard10:true}},
-    {key:'propGambler',name:'Prop Gambler',desc:'Horn, C&E, yo, aces, midnight. High risk, high reward.',risk:'high',bankroll:200,bet:5,odds:'1',press:'none',takeDown:'0',offCO:true,bets:{horn:true,ce:true,yo:true,aces:true,midnight:true}}
+  {label:'Bonus & Prop Hunters',items:[
+    {key:'atsHunter',name:'ATS Hunter',desc:'Pass + odds + Small + Tall + All. The classic bonus chaser.',risk:'med',bankroll:300,bet:10,odds:'3',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,atsSmall:true,atsTall:true,atsAll:true}},
+    {key:'atsSmallTall',name:'ATS Small & Tall Only',desc:'Skip the expensive All bet. Small + Tall at 34:1 each for better hit rate.',risk:'med',bankroll:200,bet:5,odds:'2',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,atsSmall:true,atsTall:true}},
+    {key:'hardwayHero',name:'Hardway Hero',desc:'Pass + all four hardways with half press. 7:1 and 9:1 payoffs.',risk:'high',bankroll:200,bet:5,odds:'2',press:'half',takeDown:'0',offCO:false,bets:{pass:true,passodds:true,hard4:true,hard6:true,hard8:true,hard10:true}},
+    {key:'hardwayHorn',name:'Hardways + Horn',desc:'All four hardways plus horn bet. Cover the center of the table.',risk:'high',bankroll:300,bet:5,odds:'1',press:'none',takeDown:'0',offCO:false,bets:{pass:true,hard4:true,hard6:true,hard8:true,hard10:true,horn:true}},
+    {key:'propGambler',name:'Prop Gambler',desc:'Horn, C&E, yo, aces, midnight. High risk, high reward. The degenerate\u2019s dream.',risk:'high',bankroll:200,bet:5,odds:'1',press:'none',takeDown:'0',offCO:true,bets:{horn:true,ce:true,yo:true,aces:true,midnight:true}},
+    {key:'yoHunter',name:'Yo Hunter',desc:'$5 yo every roll at 15:1. Plus pass+odds for base action. Chasing that 11.',risk:'high',bankroll:200,bet:5,odds:'2',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,yo:true}}
+  ]},
+  {label:'Advanced / Hybrid',items:[
+    {key:'insidePlusATS',name:'Inside + ATS Combo',desc:'$44 inside with half press + all three ATS bets. Bonus upside on long rolls.',risk:'med',bankroll:400,bet:10,odds:'2',press:'half',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,place5:true,place6:true,place8:true,place9:true,atsSmall:true,atsTall:true,atsAll:true}},
+    {key:'darkWithHard',name:'Dark Side + Hardways',desc:'Don\u2019t pass + lay odds + hardways. Hedge the dark side with prop upside.',risk:'med',bankroll:400,bet:10,odds:'3',press:'none',takeDown:'0',offCO:true,bets:{dontpass:true,dontpassodds:true,hard6:true,hard8:true}},
+    {key:'comeHedge',name:'Come Bet Machine',desc:'Pass + come + don\u2019t come. Hedge the come with don\u2019t come, take odds on both.',risk:'low',bankroll:400,bet:10,odds:'3',press:'none',takeDown:'0',offCO:true,bets:{pass:true,passodds:true,come:true,dontcome:true}},
+    {key:'across68Press',name:'Across + Press 6/8',desc:'All place numbers but full press only on 6 & 8 \u2014 collect on outside numbers.',risk:'med',bankroll:500,bet:10,odds:'2',press:'full',takeDown:'3',offCO:true,bets:{pass:true,passodds:true,place4:true,place5:true,place6:true,place8:true,place9:true,place10:true}},
+    {key:'fieldHardway',name:'Field + Hardways',desc:'Field every roll + all hardways. Covers lots of numbers with prop upside.',risk:'high',bankroll:300,bet:5,odds:'1',press:'none',takeDown:'0',offCO:false,bets:{field:true,hard4:true,hard6:true,hard8:true,hard10:true}}
   ]}
 ];
 
