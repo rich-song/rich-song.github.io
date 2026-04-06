@@ -3,219 +3,195 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Craps Simulator - Strategy Tester</title>
+<title>Craps Simulator - Multiplayer Strategy Tester</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#1a1a2e;--surface:#16213e;--surface2:#0f3460;--accent:#e94560;--accent2:#ffbd39;--green:#00b894;--red:#e94560;--text:#eee;--text2:#aaa;--border:#2a3a5e}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-h1{text-align:center;padding:20px;background:var(--surface);border-bottom:3px solid var(--accent);font-size:1.6em}
-h1 span{color:var(--accent2)}
+header{text-align:center;padding:18px;background:var(--surface);border-bottom:3px solid var(--accent)}
+header h1{font-size:1.5em}
+header h1 span{color:var(--accent2)}
+header p{color:var(--text2);font-size:.85em;margin-top:4px}
 
-.layout{display:grid;grid-template-columns:300px 1fr 320px;gap:16px;padding:16px;max-width:1400px;margin:0 auto}
-@media(max-width:1100px){.layout{grid-template-columns:1fr;max-width:600px}}
+.main{max-width:1500px;margin:0 auto;padding:16px}
 
 .panel{background:var(--surface);border-radius:10px;padding:16px;border:1px solid var(--border)}
-.panel h2{font-size:1.1em;margin-bottom:12px;color:var(--accent2);border-bottom:1px solid var(--border);padding-bottom:8px}
-.panel h3{font-size:.95em;margin:12px 0 6px;color:var(--accent2)}
+.panel h2{font-size:1.05em;margin-bottom:10px;color:var(--accent2);border-bottom:1px solid var(--border);padding-bottom:6px}
+.panel h3{font-size:.9em;margin:10px 0 4px;color:var(--accent2)}
 
-label{display:block;margin:8px 0 4px;font-size:.85em;color:var(--text2)}
-input,select{width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.9em}
+label{display:block;margin:6px 0 3px;font-size:.82em;color:var(--text2)}
+input,select{width:100%;padding:6px 8px;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.85em}
 input:focus,select:focus{outline:none;border-color:var(--accent2)}
+input[type="checkbox"]{width:auto;margin-right:4px}
 
-.btn{display:inline-block;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-size:.95em;font-weight:600;transition:all .2s}
-.btn-primary{background:var(--green);color:#fff;width:100%;margin-top:12px}
+.btn{display:inline-block;padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:.9em;font-weight:600;transition:all .15s}
+.btn-primary{background:var(--green);color:#fff}
 .btn-primary:hover{filter:brightness(1.15)}
-.btn-danger{background:var(--red);color:#fff;width:100%;margin-top:8px}
+.btn-danger{background:var(--red);color:#fff}
 .btn-danger:hover{filter:brightness(1.15)}
-.btn-secondary{background:var(--surface2);color:var(--text);width:100%;margin-top:8px}
+.btn-secondary{background:var(--surface2);color:var(--text)}
 .btn-secondary:hover{filter:brightness(1.3)}
-.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-sm{padding:5px 10px;font-size:.8em}
 
-.table-container{max-height:500px;overflow-y:auto}
+/* Top controls */
+.top-bar{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px}
+.top-bar .field{display:flex;flex-direction:column;gap:3px}
+.top-bar .field label{margin:0;font-size:.8em}
+.top-bar .field input{width:100px}
+.top-bar .actions{display:flex;gap:8px;align-items:flex-end}
+
+/* Dice */
+.dice-strip{display:flex;align-items:center;justify-content:center;gap:16px;padding:12px 0}
+.dice{display:inline-block;width:56px;height:56px;background:#fff;border-radius:10px;position:relative;box-shadow:0 3px 10px rgba(0,0,0,.3)}
+.dot{position:absolute;width:10px;height:10px;background:#333;border-radius:50%}
+.puck{font-weight:700;font-size:.95em;padding:4px 14px;border-radius:12px;display:inline-block}
+.puck-on{background:var(--accent);color:#fff}
+.puck-off{background:var(--text2);color:var(--bg)}
+.roll-total{font-size:1.6em;font-weight:800;color:var(--accent2);min-width:40px;text-align:center}
+
+/* Player cards grid */
+.players-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin:16px 0}
+.player-card{background:var(--surface);border-radius:10px;border:2px solid var(--border);padding:14px;position:relative;transition:border-color .2s}
+.player-card.busted{opacity:.5;border-color:var(--red)}
+.player-card .p-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.player-card .p-color{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.player-card .p-name{font-weight:700;font-size:1em;flex:1}
+.player-card .p-remove{background:none;border:none;color:var(--text2);cursor:pointer;font-size:1.1em;padding:0 4px}
+.player-card .p-remove:hover{color:var(--red)}
+
+.p-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:8px 0}
+.p-stat{background:var(--bg);border-radius:6px;padding:6px;text-align:center}
+.p-stat .v{font-size:1.1em;font-weight:700}
+.p-stat .l{font-size:.7em;color:var(--text2)}
+
+.p-strategy{font-size:.78em;color:var(--text2);line-height:1.5;padding:6px 0;border-top:1px solid var(--border);margin-top:6px}
+.p-strategy strong{color:var(--text)}
+
+/* Strategy editor modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:12px;padding:20px;max-width:500px;width:95%;max-height:85vh;overflow-y:auto;border:1px solid var(--border)}
+.modal h2{color:var(--accent2);margin-bottom:12px;font-size:1.1em}
+.modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+.strat-group{margin:8px 0}
+.strat-group label{display:inline-flex;align-items:center;margin:3px 8px 3px 0;cursor:pointer}
+
+/* Results / Leaderboard */
+.results-section{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:900px){.results-section{grid-template-columns:1fr}}
+
 table{width:100%;border-collapse:collapse;font-size:.82em}
-th,td{padding:6px 8px;text-align:left;border-bottom:1px solid var(--border)}
-th{background:var(--surface2);position:sticky;top:0;color:var(--accent2);font-size:.8em}
-tr:hover{background:rgba(255,255,255,.03)}
+th,td{padding:5px 8px;text-align:left;border-bottom:1px solid var(--border)}
+th{background:var(--surface2);position:sticky;top:0;color:var(--accent2);font-size:.78em}
 .win{color:var(--green)}.lose{color:var(--red)}
 
-.dice-area{text-align:center;padding:20px 0}
-.dice{display:inline-block;width:70px;height:70px;background:#fff;border-radius:12px;margin:0 10px;position:relative;box-shadow:0 4px 15px rgba(0,0,0,.3)}
-.dot{position:absolute;width:12px;height:12px;background:#333;border-radius:50%}
+/* Chart */
+.chart-container{position:relative;height:250px;background:var(--bg);border-radius:8px;overflow:hidden;margin-top:8px}
+canvas{width:100%!important;height:100%!important}
 
-.result-banner{text-align:center;font-size:1.4em;font-weight:700;padding:10px;margin:10px 0;border-radius:8px;min-height:50px;display:flex;align-items:center;justify-content:center}
-.result-win{background:rgba(0,184,148,.15);color:var(--green)}
-.result-lose{background:rgba(233,69,96,.15);color:var(--red)}
-.result-point{background:rgba(255,189,57,.15);color:var(--accent2)}
-.result-neutral{background:rgba(255,255,255,.05);color:var(--text2)}
+/* Odds reference */
+.ref-toggle{cursor:pointer;color:var(--accent2);font-size:.85em;display:inline-flex;align-items:center;gap:4px;margin-top:12px}
+.ref-panel{display:none;margin-top:8px}
+.ref-panel.open{display:block}
+.odds-table td:nth-child(2),.odds-table td:nth-child(3),.odds-table td:nth-child(4){text-align:center}
+.odds-table th:nth-child(2),.odds-table th:nth-child(3),.odds-table th:nth-child(4){text-align:center}
 
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.stat-box{background:var(--bg);border-radius:8px;padding:10px;text-align:center}
-.stat-box .val{font-size:1.3em;font-weight:700}
-.stat-box .lbl{font-size:.75em;color:var(--text2);margin-top:2px}
+.chart-bar{display:flex;align-items:center;gap:6px;margin:2px 0;font-size:.78em}
+.chart-bar .bar{height:14px;background:var(--accent2);border-radius:3px;transition:width .3s}
+.chart-bar .bar-label{width:24px;text-align:right;color:var(--text2)}
+.chart-bar .bar-val{color:var(--text2);min-width:30px}
 
-.point-marker{display:inline-block;background:var(--accent);color:#fff;padding:2px 10px;border-radius:12px;font-weight:700;font-size:1.1em}
-.off-marker{display:inline-block;background:var(--text2);color:var(--bg);padding:2px 10px;border-radius:12px;font-weight:700;font-size:.9em}
-.puck-area{text-align:center;margin:8px 0}
-
-.bet-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:.85em}
-.bet-row .bet-name{flex:1}
-.bet-row .bet-amt{font-weight:700;color:var(--accent2)}
-.bet-row button{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:.8em}
-.bet-row button:hover{background:var(--accent)}
-
-.speed-controls{display:flex;gap:6px;margin-top:8px}
-.speed-controls .btn{flex:1;padding:6px;font-size:.8em}
-.speed-controls .btn.active{background:var(--accent2);color:var(--bg)}
-
-.odds-table td:nth-child(2),
-.odds-table td:nth-child(3),
-.odds-table td:nth-child(4){text-align:center}
-.odds-table th:nth-child(2),
-.odds-table th:nth-child(3),
-.odds-table th:nth-child(4){text-align:center}
-
-.tab-bar{display:flex;gap:4px;margin-bottom:12px}
-.tab{padding:6px 14px;border-radius:6px 6px 0 0;cursor:pointer;font-size:.85em;background:var(--bg);color:var(--text2);border:1px solid var(--border);border-bottom:none}
-.tab.active{background:var(--surface2);color:var(--accent2)}
-.tab-content{display:none}
-.tab-content.active{display:block}
-
-.chart-bar{display:flex;align-items:center;gap:8px;margin:3px 0;font-size:.8em}
-.chart-bar .bar{height:16px;background:var(--accent2);border-radius:3px;transition:width .3s}
-.chart-bar .bar-label{width:30px;text-align:right;color:var(--text2)}
-.chart-bar .bar-val{color:var(--text2);min-width:35px}
+.preset-btn{padding:4px 10px;font-size:.78em;border-radius:4px;border:1px solid var(--border);background:var(--bg);color:var(--text2);cursor:pointer;margin:2px}
+.preset-btn:hover{border-color:var(--accent2);color:var(--accent2)}
 </style>
 </head>
 <body>
-<h1>Craps <span>Simulator</span></h1>
-<div class="layout">
 
-<!-- LEFT PANEL: BETS & CONFIG -->
-<div class="panel" id="bet-panel">
-<h2>Place Your Bets</h2>
-<label>Bankroll ($)</label>
-<input type="number" id="bankroll" value="200" min="5" step="5">
-<label>Base Bet ($5 minimum)</label>
-<input type="number" id="baseBet" value="5" min="5" step="1">
+<header>
+<h1>Craps <span>Simulator</span> - Multiplayer</h1>
+<p>Each player picks a strategy. Everyone shares the same dice. Compare results over N rolls.</p>
+</header>
 
-<h3>Line Bets</h3>
-<div>
-<label><input type="checkbox" id="bet-pass" checked> Pass Line</label>
-<label><input type="checkbox" id="bet-dontpass"> Don't Pass</label>
-<label><input type="checkbox" id="bet-passodds"> Pass Line Odds (after point)
-  <select id="odds-mult"><option value="1">1x</option><option value="2" selected>2x</option><option value="3">3x</option><option value="5">5x</option><option value="10">10x</option></select>
-</label>
-<label><input type="checkbox" id="bet-dontpassodds"> Don't Pass Odds (after point)</label>
+<div class="main">
+
+<!-- TOP CONTROLS -->
+<div class="top-bar">
+<div class="field">
+<label>Rolls to simulate</label>
+<input type="number" id="simCount" value="500" min="1" max="100000">
 </div>
-
-<h3>Come / Don't Come</h3>
-<div>
-<label><input type="checkbox" id="bet-come"> Come</label>
-<label><input type="checkbox" id="bet-dontcome"> Don't Come</label>
+<div class="field">
+<label>Starting bankroll</label>
+<input type="number" id="globalBankroll" value="200" min="5" step="5">
 </div>
-
-<h3>Single-Roll Bets</h3>
-<div>
-<label><input type="checkbox" id="bet-field"> Field</label>
-<label><input type="checkbox" id="bet-any7"> Any 7</label>
-<label><input type="checkbox" id="bet-anyCraps"> Any Craps</label>
-</div>
-
-<h3>Place Bets</h3>
-<div>
-<label><input type="checkbox" id="bet-place6"> Place 6</label>
-<label><input type="checkbox" id="bet-place8"> Place 8</label>
-<label><input type="checkbox" id="bet-place5"> Place 5</label>
-<label><input type="checkbox" id="bet-place9"> Place 9</label>
-<label><input type="checkbox" id="bet-place4"> Place 4</label>
-<label><input type="checkbox" id="bet-place10"> Place 10</label>
-</div>
-
-<h3>Simulation</h3>
-<label>Auto-roll count</label>
-<input type="number" id="simCount" value="100" min="1" max="10000">
-<div class="speed-controls">
-<button class="btn btn-secondary speed-btn" data-speed="500">Slow</button>
-<button class="btn btn-secondary speed-btn active" data-speed="50">Fast</button>
-<button class="btn btn-secondary speed-btn" data-speed="0">Instant</button>
+<div class="actions">
+<button class="btn btn-secondary" id="addPlayerBtn">+ Add Player</button>
+<button class="btn btn-primary" id="runBtn">Run Simulation</button>
+<button class="btn btn-danger btn-sm" id="resetBtn">Reset</button>
 </div>
 </div>
 
-<!-- CENTER: GAME AREA -->
-<div>
+<!-- DICE DISPLAY -->
 <div class="panel">
-<div class="puck-area" id="puckArea"><span class="off-marker">OFF</span></div>
-<div class="dice-area">
+<div class="dice-strip">
+<span class="puck puck-off" id="puck">OFF</span>
 <div class="dice" id="die1"></div>
 <div class="dice" id="die2"></div>
+<span class="roll-total" id="rollTotal">-</span>
+<span style="color:var(--text2);font-size:.85em">Roll <strong id="rollNum">0</strong> / <span id="rollMax">0</span></span>
 </div>
-<div class="result-banner result-neutral" id="resultBanner">Roll the dice!</div>
-
-<div id="activeBets" style="margin:10px 0"></div>
-
-<div style="display:flex;gap:8px;flex-wrap:wrap">
-<button class="btn btn-primary" id="rollBtn" style="flex:1">Roll Dice</button>
-<button class="btn btn-secondary" id="autoBtn" style="flex:1">Auto-Roll</button>
-</div>
-<button class="btn btn-danger" id="resetBtn">Reset Game</button>
 </div>
 
-<!-- STATS -->
-<div class="panel" style="margin-top:16px">
-<h2>Session Stats</h2>
-<div class="stats-grid">
-<div class="stat-box"><div class="val" id="sBankroll">$200</div><div class="lbl">Bankroll</div></div>
-<div class="stat-box"><div class="val" id="sProfit">$0</div><div class="lbl">Net Profit</div></div>
-<div class="stat-box"><div class="val" id="sRolls">0</div><div class="lbl">Rolls</div></div>
-<div class="stat-box"><div class="val" id="sWins">0</div><div class="lbl">Wins</div></div>
-<div class="stat-box"><div class="val" id="sLosses">0</div><div class="lbl">Losses</div></div>
-<div class="stat-box"><div class="val" id="sWinRate">0%</div><div class="lbl">Win Rate</div></div>
+<!-- PLAYER CARDS -->
+<div class="players-grid" id="playersGrid"></div>
+
+<!-- RESULTS -->
+<div class="results-section">
+<div class="panel">
+<h2>Leaderboard</h2>
+<table>
+<thead><tr><th></th><th>Player</th><th>Strategy</th><th>Final $</th><th>Net P/L</th><th>Win%</th><th>Peak</th><th>Low</th></tr></thead>
+<tbody id="leaderBody"></tbody>
+</table>
 </div>
-<h3 style="margin-top:12px;color:var(--accent2)">Roll Distribution</h3>
-<div id="rollDist"></div>
+<div class="panel">
+<h2>Bankroll Over Time</h2>
+<div class="chart-container"><canvas id="chartCanvas"></canvas></div>
+</div>
 </div>
 
-<!-- HISTORY -->
-<div class="panel" style="margin-top:16px">
-<h2>Roll History</h2>
-<div class="table-container" style="max-height:250px">
-<table><thead><tr><th>#</th><th>Dice</th><th>Total</th><th>Result</th><th>P/L</th></tr></thead>
+<div class="results-section" style="margin-top:0">
+<div class="panel">
+<h2>Roll History (last 50)</h2>
+<div style="max-height:250px;overflow-y:auto">
+<table><thead><tr><th>#</th><th>Dice</th><th>Total</th><th>Phase</th></tr></thead>
 <tbody id="historyBody"></tbody></table>
 </div>
 </div>
-</div>
-
-<!-- RIGHT PANEL: ODDS INFO -->
 <div class="panel">
-<h2>Craps Reference</h2>
-<div class="tab-bar">
-<div class="tab active" data-tab="odds">Odds & Payouts</div>
-<div class="tab" data-tab="rules">Rules</div>
-<div class="tab" data-tab="strategy">Strategy</div>
-</div>
-
-<div class="tab-content active" id="tab-odds">
-<table class="odds-table">
-<thead><tr><th>Bet</th><th>Pays</th><th>House Edge</th><th>Prob.</th></tr></thead>
+<h2>Roll Distribution</h2>
+<div id="rollDist"></div>
+<div style="margin-top:12px">
+<span class="ref-toggle" id="refToggle">&#9660; Odds & Payouts Reference</span>
+<div class="ref-panel" id="refPanel">
+<table class="odds-table" style="margin-top:8px">
+<thead><tr><th>Bet</th><th>Pays</th><th>House Edge</th></tr></thead>
 <tbody>
-<tr><td>Pass Line</td><td>1:1</td><td>1.41%</td><td>49.3%</td></tr>
-<tr><td>Don't Pass</td><td>1:1</td><td>1.36%</td><td>47.9%</td></tr>
-<tr><td>Pass Odds</td><td>True odds</td><td>0%</td><td>-</td></tr>
-<tr><td>Don't Pass Odds</td><td>True odds</td><td>0%</td><td>-</td></tr>
-<tr><td>Come</td><td>1:1</td><td>1.41%</td><td>49.3%</td></tr>
-<tr><td>Don't Come</td><td>1:1</td><td>1.36%</td><td>47.9%</td></tr>
-<tr><td>Place 6/8</td><td>7:6</td><td>1.52%</td><td>45.5%</td></tr>
-<tr><td>Place 5/9</td><td>7:5</td><td>4.00%</td><td>40.0%</td></tr>
-<tr><td>Place 4/10</td><td>9:5</td><td>6.67%</td><td>33.3%</td></tr>
-<tr><td>Field</td><td>1:1 (2x on 2,12)</td><td>5.56%</td><td>44.4%</td></tr>
-<tr><td>Any 7</td><td>4:1</td><td>16.67%</td><td>16.7%</td></tr>
-<tr><td>Any Craps</td><td>7:1</td><td>11.11%</td><td>11.1%</td></tr>
+<tr><td>Pass Line</td><td>1:1</td><td>1.41%</td></tr>
+<tr><td>Don't Pass</td><td>1:1</td><td>1.36%</td></tr>
+<tr><td>Pass/DP Odds</td><td>True odds</td><td>0%</td></tr>
+<tr><td>Come / Don't Come</td><td>1:1</td><td>1.41% / 1.36%</td></tr>
+<tr><td>Place 6/8</td><td>7:6</td><td>1.52%</td></tr>
+<tr><td>Place 5/9</td><td>7:5</td><td>4.00%</td></tr>
+<tr><td>Place 4/10</td><td>9:5</td><td>6.67%</td></tr>
+<tr><td>Field</td><td>1:1 (2x on 2,12)</td><td>5.56%</td></tr>
+<tr><td>Any 7</td><td>4:1</td><td>16.67%</td></tr>
+<tr><td>Any Craps</td><td>7:1</td><td>11.11%</td></tr>
 </tbody>
 </table>
-
-<h3>True Odds Payouts</h3>
-<table class="odds-table">
-<thead><tr><th>Point</th><th>Pass Odds</th><th>Don't Pass Odds</th></tr></thead>
+<table class="odds-table" style="margin-top:8px">
+<thead><tr><th>Point</th><th>Pass Odds Pay</th><th>Don't Pass Odds Pay</th></tr></thead>
 <tbody>
 <tr><td>4 or 10</td><td>2:1</td><td>1:2</td></tr>
 <tr><td>5 or 9</td><td>3:2</td><td>2:3</td></tr>
@@ -223,490 +199,564 @@ tr:hover{background:rgba(255,255,255,.03)}
 </tbody>
 </table>
 </div>
-
-<div class="tab-content" id="tab-rules">
-<p style="font-size:.85em;line-height:1.6;color:var(--text2)">
-<strong style="color:var(--text)">Come-Out Roll:</strong><br>
-- Roll 7 or 11: Pass Line wins<br>
-- Roll 2, 3, or 12: Pass Line loses (craps)<br>
-- Any other number (4,5,6,8,9,10) becomes the <strong>Point</strong><br><br>
-
-<strong style="color:var(--text)">Point Phase:</strong><br>
-- Roll the Point again before 7: Pass Line wins<br>
-- Roll 7 before the Point: Pass Line loses (seven-out)<br>
-- All other rolls: no decision on Pass Line<br><br>
-
-<strong style="color:var(--text)">Don't Pass:</strong> Opposite of Pass Line. 12 on come-out is a push (bar 12).<br><br>
-
-<strong style="color:var(--text)">Come/Don't Come:</strong> Same as Pass/Don't Pass but placed after the point is set.<br><br>
-
-<strong style="color:var(--text)">Place Bets:</strong> Bet that a specific number (4,5,6,8,9,10) will be rolled before 7. Active only when a point is established.<br><br>
-
-<strong style="color:var(--text)">Field:</strong> Single-roll bet. Wins on 2,3,4,9,10,11,12. Pays double on 2 and 12.<br><br>
-
-<strong style="color:var(--text)">Any 7:</strong> Single-roll bet that next roll is 7. Pays 4:1.<br><br>
-
-<strong style="color:var(--text)">Any Craps:</strong> Single-roll bet that next roll is 2, 3, or 12. Pays 7:1.
-</p>
 </div>
-
-<div class="tab-content" id="tab-strategy">
-<p style="font-size:.85em;line-height:1.6;color:var(--text2)">
-<strong style="color:var(--green)">Best Bets (Low House Edge):</strong><br>
-1. <strong>Pass/Don't Pass + Odds</strong> - The odds bet has 0% house edge. Combined with pass line (1.41%), this is the best strategy in craps.<br><br>
-2. <strong>Place 6 or 8</strong> - Only 1.52% house edge. Good supplemental bet.<br><br>
-3. <strong>Come with Odds</strong> - Spreads your action across multiple numbers with minimal house edge.<br><br>
-
-<strong style="color:var(--red)">Worst Bets (High House Edge):</strong><br>
-1. <strong>Any 7</strong> - 16.67% house edge<br>
-2. <strong>Any Craps</strong> - 11.11% house edge<br>
-3. <strong>Hardways</strong> - 9-11% house edge<br>
-4. <strong>Field</strong> - 5.56% house edge<br><br>
-
-<strong style="color:var(--accent2)">Strategy Tips:</strong><br>
-- Always take maximum odds on Pass/Come bets<br>
-- The more you bet on odds, the lower your overall house edge<br>
-- Place 6 and 8 are the best place bets<br>
-- Avoid single-roll proposition bets<br>
-- Set a win/loss limit and stick to it<br>
-- $5 Pass Line + max odds is the classic low-edge strategy
-</p>
 </div>
 </div>
 
+</div>
+
+<!-- STRATEGY EDITOR MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+<div class="modal">
+<h2 id="modalTitle">Edit Strategy</h2>
+<label>Player Name</label>
+<input type="text" id="mName" value="Player 1" maxlength="20">
+<label>Base Bet ($5 minimum)</label>
+<input type="number" id="mBet" value="5" min="5" step="1">
+
+<h3>Presets</h3>
+<div style="margin-bottom:8px">
+<button class="preset-btn" data-preset="conservative">Conservative</button>
+<button class="preset-btn" data-preset="passodds">Pass + Max Odds</button>
+<button class="preset-btn" data-preset="darkside">Dark Side</button>
+<button class="preset-btn" data-preset="ironCross">Iron Cross</button>
+<button class="preset-btn" data-preset="place68">Place 6 & 8</button>
+<button class="preset-btn" data-preset="fieldWarrior">Field Warrior</button>
+<button class="preset-btn" data-preset="allIn">All-In Degen</button>
+</div>
+
+<h3>Line Bets</h3>
+<div class="strat-group">
+<label><input type="checkbox" id="m-pass"> Pass Line</label>
+<label><input type="checkbox" id="m-dontpass"> Don't Pass</label>
+<label><input type="checkbox" id="m-passodds"> Pass Odds</label>
+<label><input type="checkbox" id="m-dontpassodds"> Don't Pass Odds</label>
+<label>Odds multiplier: <select id="m-oddsMult" style="width:60px;display:inline-block"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="5">5x</option><option value="10">10x</option></select></label>
+</div>
+
+<h3>Come / Don't Come</h3>
+<div class="strat-group">
+<label><input type="checkbox" id="m-come"> Come</label>
+<label><input type="checkbox" id="m-dontcome"> Don't Come</label>
+</div>
+
+<h3>Place Bets</h3>
+<div class="strat-group">
+<label><input type="checkbox" id="m-place4"> Place 4</label>
+<label><input type="checkbox" id="m-place5"> Place 5</label>
+<label><input type="checkbox" id="m-place6"> Place 6</label>
+<label><input type="checkbox" id="m-place8"> Place 8</label>
+<label><input type="checkbox" id="m-place9"> Place 9</label>
+<label><input type="checkbox" id="m-place10"> Place 10</label>
+</div>
+
+<h3>Single-Roll Bets</h3>
+<div class="strat-group">
+<label><input type="checkbox" id="m-field"> Field</label>
+<label><input type="checkbox" id="m-any7"> Any 7</label>
+<label><input type="checkbox" id="m-anyCraps"> Any Craps</label>
+</div>
+
+<div class="modal-actions">
+<button class="btn btn-secondary" id="modalCancel">Cancel</button>
+<button class="btn btn-primary" id="modalSave">Save Strategy</button>
+</div>
+</div>
 </div>
 
 <script>
-// ─── GAME STATE ───
-const G = {
-  bankroll: 200, startBankroll: 200, point: 0, phase: 'comeout',
-  rolls: 0, wins: 0, losses: 0, rollCounts: {},
-  activeBets: [], comeBets: [], dontComeBets: [],
-  autoRunning: false, speed: 50, history: []
+// ─── CONSTANTS ───
+const COLORS=['#e94560','#00b894','#ffbd39','#6c5ce7','#00cec9','#fd79a8','#fdcb6e','#55efc4'];
+const PRESETS={
+  conservative:{pass:true,base:5,oddsMult:1,label:'Pass $5'},
+  passodds:{pass:true,passodds:true,base:5,oddsMult:10,label:'Pass+10x Odds'},
+  darkside:{dontpass:true,dontpassodds:true,base:5,oddsMult:3,label:'Dark Side 3x'},
+  ironCross:{place5:true,place6:true,place8:true,field:true,base:5,label:'Iron Cross'},
+  place68:{pass:true,place6:true,place8:true,base:5,oddsMult:2,label:'Pass+Place 6/8'},
+  fieldWarrior:{field:true,base:10,label:'Field $10'},
+  allIn:{pass:true,passodds:true,come:true,place6:true,place8:true,field:true,any7:true,base:5,oddsMult:5,label:'All-In Degen'}
 };
-for(let i=2;i<=12;i++) G.rollCounts[i]=0;
+const BET_KEYS=['pass','dontpass','passodds','dontpassodds','come','dontcome','place4','place5','place6','place8','place9','place10','field','any7','anyCraps'];
 
-// ─── DOM ───
+// ─── STATE ───
+let players=[];
+let simRunning=false;
+let tablePoint=0, tablePhase='comeout';
+let rollCount=0, rollCounts={};
+let history=[];
+for(let i=2;i<=12;i++) rollCounts[i]=0;
+
 const $=id=>document.getElementById(id);
-const die1=$('die1'), die2=$('die2'), banner=$('resultBanner');
 
-// ─── DICE RENDERING ───
-const dotPos={
-  1:[[50,50]],
-  2:[[25,25],[75,75]],
-  3:[[25,25],[50,50],[75,75]],
-  4:[[25,25],[75,25],[25,75],[75,75]],
-  5:[[25,25],[75,25],[50,50],[25,75],[75,75]],
-  6:[[25,25],[75,25],[25,50],[75,50],[25,75],[75,75]]
-};
-function drawDie(el,val){
-  el.innerHTML='';
-  (dotPos[val]||[]).forEach(([x,y])=>{
-    const d=document.createElement('div');
-    d.className='dot';
-    d.style.left=(x-8.5)+'%';d.style.top=(y-8.5)+'%';
-    el.appendChild(d);
-  });
-}
-drawDie(die1,1);drawDie(die2,2);
-
-// ─── TABS ───
-document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
-  t.classList.add('active');
-  $('tab-'+t.dataset.tab).classList.add('active');
-}));
-
-// ─── SPEED ───
-document.querySelectorAll('.speed-btn').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('.speed-btn').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');G.speed=+b.dataset.speed;
-}));
-
-// ─── ODDS PAYOUT HELPERS ───
-function passOddsPayout(point,bet){
-  if(point===4||point===10) return bet*2;
-  if(point===5||point===9) return bet*1.5;
-  if(point===6||point===8) return bet*1.2;
-  return 0;
-}
-function dontPassOddsPayout(point,bet){
-  if(point===4||point===10) return bet*0.5;
-  if(point===5||point===9) return bet*(2/3);
-  if(point===6||point===8) return bet*(5/6);
-  return 0;
-}
-function placePayout(num,bet){
-  if(num===6||num===8) return bet*(7/6);
-  if(num===5||num===9) return bet*(7/5);
-  if(num===4||num===10) return bet*(9/5);
-  return 0;
-}
-
-// ─── READ CONFIG ───
-function getConfig(){
-  const base=Math.max(5,+$('baseBet').value||5);
+// ─── PLAYER CLASS ───
+function createPlayer(name,color,strategy){
   return {
-    bankroll:+$('bankroll').value||200,
-    base,
-    pass:$('bet-pass').checked,
-    dontpass:$('bet-dontpass').checked,
-    passodds:$('bet-passodds').checked,
-    dontpassodds:$('bet-dontpassodds').checked,
-    oddsMult:+$('odds-mult').value,
-    come:$('bet-come').checked,
-    dontcome:$('bet-dontcome').checked,
-    field:$('bet-field').checked,
-    any7:$('bet-any7').checked,
-    anyCraps:$('bet-anyCraps').checked,
-    place6:$('bet-place6').checked,
-    place8:$('bet-place8').checked,
-    place5:$('bet-place5').checked,
-    place9:$('bet-place9').checked,
-    place4:$('bet-place4').checked,
-    place10:$('bet-place10').checked,
+    name, color, strategy:{...strategy},
+    bankroll:+$('globalBankroll').value||200,
+    startBankroll:+$('globalBankroll').value||200,
+    wins:0,losses:0,peak:+$('globalBankroll').value||200,low:+$('globalBankroll').value||200,
+    activeBets:[],
+    bankrollHistory:[+$('globalBankroll').value||200],
+    busted:false
   };
 }
 
-// ─── PLACE BETS ───
-function placeBets(cfg){
-  const bet=cfg.base;
-  let totalNeeded=0;
-  const pending=[];
+function defaultStrategy(){
+  const s={base:5,oddsMult:2};
+  BET_KEYS.forEach(k=>s[k]=false);
+  s.pass=true;
+  return s;
+}
 
-  // Pass line on come-out
-  if(cfg.pass && G.phase==='comeout'){
-    pending.push({type:'pass',amount:bet});totalNeeded+=bet;
-  }
-  if(cfg.dontpass && G.phase==='comeout'){
-    pending.push({type:'dontpass',amount:bet});totalNeeded+=bet;
-  }
-  // Pass odds after point
-  if(cfg.passodds && G.phase==='point'){
-    const has=G.activeBets.find(b=>b.type==='passodds');
-    if(!has){
-      const oddsAmt=bet*cfg.oddsMult;
-      pending.push({type:'passodds',amount:oddsAmt});totalNeeded+=oddsAmt;
-    }
-  }
-  if(cfg.dontpassodds && G.phase==='point'){
-    const has=G.activeBets.find(b=>b.type==='dontpassodds');
-    if(!has){
-      const oddsAmt=bet*cfg.oddsMult;
-      pending.push({type:'dontpassodds',amount:oddsAmt});totalNeeded+=oddsAmt;
-    }
-  }
-  // Come
-  if(cfg.come && G.phase==='point'){
-    pending.push({type:'come',amount:bet,stage:'waiting'});totalNeeded+=bet;
-  }
-  if(cfg.dontcome && G.phase==='point'){
-    pending.push({type:'dontcome',amount:bet,stage:'waiting'});totalNeeded+=bet;
-  }
-  // Place bets (only when point is on)
-  if(G.phase==='point'){
+function strategyLabel(s){
+  const parts=[];
+  if(s.pass)parts.push('Pass');
+  if(s.dontpass)parts.push("Don't Pass");
+  if(s.passodds)parts.push(s.oddsMult+'x Odds');
+  if(s.dontpassodds)parts.push(s.oddsMult+'x DP Odds');
+  if(s.come)parts.push('Come');
+  if(s.dontcome)parts.push("Don't Come");
+  [4,5,6,8,9,10].forEach(n=>{if(s['place'+n])parts.push('Pl'+n);});
+  if(s.field)parts.push('Field');
+  if(s.any7)parts.push('Any7');
+  if(s.anyCraps)parts.push('AnyCraps');
+  return '$'+s.base+' '+parts.join('+');
+}
+
+// ─── INIT DEFAULT PLAYERS ───
+function initDefaults(){
+  players=[];
+  const s1=defaultStrategy();s1.pass=true;s1.passodds=true;s1.oddsMult=3;
+  players.push(createPlayer('Pass + 3x Odds',COLORS[0],s1));
+  const s2=defaultStrategy();s2.pass=false;s2.dontpass=true;s2.dontpassodds=true;s2.oddsMult=3;
+  players.push(createPlayer('Dark Side 3x',COLORS[1],s2));
+  const s3=defaultStrategy();s3.pass=true;s3.place6=true;s3.place8=true;s3.passodds=true;s3.oddsMult=2;
+  players.push(createPlayer('Pass+Place 6&8',COLORS[2],s3));
+}
+initDefaults();
+
+// ─── DICE RENDERING ───
+const dotPos={1:[[50,50]],2:[[25,25],[75,75]],3:[[25,25],[50,50],[75,75]],4:[[25,25],[75,25],[25,75],[75,75]],5:[[25,25],[75,25],[50,50],[25,75],[75,75]],6:[[25,25],[75,25],[25,50],[75,50],[25,75],[75,75]]};
+function drawDie(el,val){
+  el.innerHTML='';
+  (dotPos[val]||[]).forEach(([x,y])=>{
+    const d=document.createElement('div');d.className='dot';
+    d.style.left=(x-9)+'%';d.style.top=(y-9)+'%';
+    el.appendChild(d);
+  });
+}
+drawDie($('die1'),1);drawDie($('die2'),2);
+
+// ─── PAYOUT HELPERS ───
+function passOddsPay(pt,bet){return pt===4||pt===10?bet*2:pt===5||pt===9?bet*1.5:bet*1.2;}
+function dpOddsPay(pt,bet){return pt===4||pt===10?bet*.5:pt===5||pt===9?bet*(2/3):bet*(5/6);}
+function placePay(n,bet){return n===6||n===8?bet*(7/6):n===5||n===9?bet*(7/5):bet*(9/5);}
+
+// ─── PLACE BETS FOR A PLAYER ───
+function placeBetsFor(p){
+  if(p.busted)return;
+  const s=p.strategy;const bet=s.base;
+  let need=0;const pending=[];
+
+  if(s.pass&&tablePhase==='comeout'){pending.push({type:'pass',amount:bet});need+=bet;}
+  if(s.dontpass&&tablePhase==='comeout'){pending.push({type:'dontpass',amount:bet});need+=bet;}
+  if(s.passodds&&tablePhase==='point'&&!p.activeBets.find(b=>b.type==='passodds')){
+    const a=bet*s.oddsMult;pending.push({type:'passodds',amount:a});need+=a;}
+  if(s.dontpassodds&&tablePhase==='point'&&!p.activeBets.find(b=>b.type==='dontpassodds')){
+    const a=bet*s.oddsMult;pending.push({type:'dontpassodds',amount:a});need+=a;}
+  if(s.come&&tablePhase==='point'){pending.push({type:'come',amount:bet,stage:'waiting'});need+=bet;}
+  if(s.dontcome&&tablePhase==='point'){pending.push({type:'dontcome',amount:bet,stage:'waiting'});need+=bet;}
+  if(tablePhase==='point'){
     [4,5,6,8,9,10].forEach(n=>{
-      const key='place'+n;
-      if(cfg[key]){
-        const has=G.activeBets.find(b=>b.type==='place'&&b.number===n);
-        if(!has){
-          // Place bets on 6/8 should be multiples of 6 for proper payouts
-          let pAmt=bet;
-          if((n===6||n===8)&&pAmt%6!==0) pAmt=Math.ceil(pAmt/6)*6;
-          pending.push({type:'place',amount:pAmt,number:n});totalNeeded+=pAmt;
-        }
+      if(s['place'+n]&&!p.activeBets.find(b=>b.type==='place'&&b.number===n)){
+        let a=bet;if((n===6||n===8)&&a%6!==0)a=Math.ceil(a/6)*6;
+        pending.push({type:'place',amount:a,number:n});need+=a;
       }
     });
   }
-  // Single-roll bets
-  if(cfg.field){pending.push({type:'field',amount:bet});totalNeeded+=bet;}
-  if(cfg.any7){pending.push({type:'any7',amount:bet});totalNeeded+=bet;}
-  if(cfg.anyCraps){pending.push({type:'anyCraps',amount:bet});totalNeeded+=bet;}
+  if(s.field){pending.push({type:'field',amount:bet});need+=bet;}
+  if(s.any7){pending.push({type:'any7',amount:bet});need+=bet;}
+  if(s.anyCraps){pending.push({type:'anyCraps',amount:bet});need+=bet;}
 
-  if(totalNeeded>G.bankroll) return false;
-  pending.forEach(b=>{G.bankroll-=b.amount;G.activeBets.push(b);});
-  return true;
+  if(need>p.bankroll){p.busted=true;return;}
+  pending.forEach(b=>{p.bankroll-=b.amount;p.activeBets.push(b);});
 }
 
-// ─── RESOLVE ROLL ───
-function resolveRoll(d1,d2){
-  const total=d1+d2;
-  let netPL=0;
-  const results=[];
-  const toRemove=[];
+// ─── RESOLVE ROLL FOR A PLAYER ───
+function resolveFor(p,total){
+  if(p.busted)return;
+  let net=0;const rm=[];
 
-  G.activeBets.forEach((b,i)=>{
-    // PASS LINE
+  p.activeBets.forEach((b,i)=>{
     if(b.type==='pass'){
-      if(G.phase==='comeout'){
-        if(total===7||total===11){
-          netPL+=b.amount*2;results.push('Pass wins!');toRemove.push(i);
-        }else if(total===2||total===3||total===12){
-          results.push('Pass loses (craps)');toRemove.push(i);
-        }
+      if(tablePhase==='comeout'){
+        if(total===7||total===11){net+=b.amount*2;rm.push(i);}
+        else if(total===2||total===3||total===12){rm.push(i);}
       }else{
-        if(total===G.point){
-          netPL+=b.amount*2;results.push('Pass wins - hit the point!');toRemove.push(i);
-        }else if(total===7){
-          results.push('Seven out - Pass loses');toRemove.push(i);
-        }
+        if(total===tablePoint){net+=b.amount*2;rm.push(i);}
+        else if(total===7){rm.push(i);}
       }
     }
-    // DON'T PASS
     if(b.type==='dontpass'){
-      if(G.phase==='comeout'){
-        if(total===2||total===3){
-          netPL+=b.amount*2;results.push("Don't Pass wins!");toRemove.push(i);
-        }else if(total===12){
-          netPL+=b.amount;results.push("Don't Pass push (bar 12)");toRemove.push(i);
-        }else if(total===7||total===11){
-          results.push("Don't Pass loses");toRemove.push(i);
-        }
+      if(tablePhase==='comeout'){
+        if(total===2||total===3){net+=b.amount*2;rm.push(i);}
+        else if(total===12){net+=b.amount;rm.push(i);}
+        else if(total===7||total===11){rm.push(i);}
       }else{
-        if(total===7){
-          netPL+=b.amount*2;results.push("Don't Pass wins - seven out!");toRemove.push(i);
-        }else if(total===G.point){
-          results.push("Don't Pass loses - point hit");toRemove.push(i);
-        }
+        if(total===7){net+=b.amount*2;rm.push(i);}
+        else if(total===tablePoint){rm.push(i);}
       }
     }
-    // PASS ODDS
     if(b.type==='passodds'){
-      if(total===G.point){
-        netPL+=b.amount+passOddsPayout(G.point,b.amount);
-        results.push('Pass Odds wins!');toRemove.push(i);
-      }else if(total===7){
-        results.push('Pass Odds loses');toRemove.push(i);
-      }
+      if(total===tablePoint){net+=b.amount+passOddsPay(tablePoint,b.amount);rm.push(i);}
+      else if(total===7){rm.push(i);}
     }
-    // DON'T PASS ODDS
     if(b.type==='dontpassodds'){
-      if(total===7){
-        netPL+=b.amount+dontPassOddsPayout(G.point,b.amount);
-        results.push("Don't Pass Odds wins!");toRemove.push(i);
-      }else if(total===G.point){
-        results.push("Don't Pass Odds loses");toRemove.push(i);
-      }
+      if(total===7){net+=b.amount+dpOddsPay(tablePoint,b.amount);rm.push(i);}
+      else if(total===tablePoint){rm.push(i);}
     }
-    // COME
     if(b.type==='come'){
       if(b.stage==='waiting'){
-        if(total===7||total===11){
-          netPL+=b.amount*2;results.push('Come wins!');toRemove.push(i);
-        }else if(total===2||total===3||total===12){
-          results.push('Come loses');toRemove.push(i);
-        }else{
-          b.stage='point';b.number=total;
-          results.push('Come point set: '+total);
-        }
-      }else if(b.stage==='point'){
-        if(total===b.number){
-          netPL+=b.amount*2;results.push('Come '+b.number+' wins!');toRemove.push(i);
-        }else if(total===7){
-          results.push('Come '+b.number+' loses (7-out)');toRemove.push(i);
-        }
+        if(total===7||total===11){net+=b.amount*2;rm.push(i);}
+        else if(total===2||total===3||total===12){rm.push(i);}
+        else{b.stage='point';b.number=total;}
+      }else{
+        if(total===b.number){net+=b.amount*2;rm.push(i);}
+        else if(total===7){rm.push(i);}
       }
     }
-    // DON'T COME
     if(b.type==='dontcome'){
       if(b.stage==='waiting'){
-        if(total===2||total===3){
-          netPL+=b.amount*2;results.push("Don't Come wins!");toRemove.push(i);
-        }else if(total===12){
-          netPL+=b.amount;results.push("Don't Come push");toRemove.push(i);
-        }else if(total===7||total===11){
-          results.push("Don't Come loses");toRemove.push(i);
-        }else{
-          b.stage='point';b.number=total;
-          results.push("Don't Come point set: "+total);
-        }
-      }else if(b.stage==='point'){
-        if(total===7){
-          netPL+=b.amount*2;results.push("Don't Come "+b.number+" wins!");toRemove.push(i);
-        }else if(total===b.number){
-          results.push("Don't Come "+b.number+" loses");toRemove.push(i);
-        }
+        if(total===2||total===3){net+=b.amount*2;rm.push(i);}
+        else if(total===12){net+=b.amount;rm.push(i);}
+        else if(total===7||total===11){rm.push(i);}
+        else{b.stage='point';b.number=total;}
+      }else{
+        if(total===7){net+=b.amount*2;rm.push(i);}
+        else if(total===b.number){rm.push(i);}
       }
     }
-    // PLACE BETS
     if(b.type==='place'){
-      if(total===b.number){
-        const win=placePayout(b.number,b.amount);
-        netPL+=b.amount+win;results.push('Place '+b.number+' wins $'+win.toFixed(2));toRemove.push(i);
-      }else if(total===7){
-        results.push('Place '+b.number+' loses (7-out)');toRemove.push(i);
-      }
+      if(total===b.number){net+=b.amount+placePay(b.number,b.amount);rm.push(i);}
+      else if(total===7){rm.push(i);}
     }
-    // FIELD
     if(b.type==='field'){
       if([2,3,4,9,10,11,12].includes(total)){
-        let mult=1;if(total===2||total===12)mult=2;
-        netPL+=b.amount+b.amount*mult;results.push('Field wins'+(mult===2?' (double)':'')+'!');
-      }else{
-        results.push('Field loses');
+        let m=1;if(total===2||total===12)m=2;
+        net+=b.amount+b.amount*m;
       }
-      toRemove.push(i);
+      rm.push(i);
     }
-    // ANY 7
     if(b.type==='any7'){
-      if(total===7){netPL+=b.amount+b.amount*4;results.push('Any 7 wins!');}
-      else results.push('Any 7 loses');
-      toRemove.push(i);
+      if(total===7)net+=b.amount+b.amount*4;
+      rm.push(i);
     }
-    // ANY CRAPS
     if(b.type==='anyCraps'){
-      if(total===2||total===3||total===12){netPL+=b.amount+b.amount*7;results.push('Any Craps wins!');}
-      else results.push('Any Craps loses');
-      toRemove.push(i);
+      if(total===2||total===3||total===12)net+=b.amount+b.amount*7;
+      rm.push(i);
     }
   });
 
-  // Remove settled bets (reverse order)
-  toRemove.sort((a,b)=>b-a).forEach(i=>G.activeBets.splice(i,1));
-
-  G.bankroll+=netPL;
-
-  // Phase transitions
-  if(G.phase==='comeout'&&[4,5,6,8,9,10].includes(total)){
-    G.point=total;G.phase='point';results.push('Point is '+total);
-  }else if(G.phase==='point'&&total===7){
-    G.point=0;G.phase='comeout';G.activeBets=[];// seven-out clears everything
-  }else if(G.phase==='point'&&total===G.point){
-    G.point=0;G.phase='comeout';
-  }
-
-  // Count wins/losses
-  const spent=netPL;
-  if(netPL>0){G.wins++;return {results,pl:netPL,type:'win'};}
-  else if(netPL<0||(toRemove.length>0&&netPL===0)){G.losses++;return {results,pl:netPL,type:netPL<0?'lose':'push'};}
-  return {results,pl:0,type:'neutral'};
+  rm.sort((a,b)=>b-a).forEach(i=>p.activeBets.splice(i,1));
+  p.bankroll+=net;
+  if(net>0)p.wins++;
+  else if(rm.length>0)p.losses++;
+  if(p.bankroll>p.peak)p.peak=p.bankroll;
+  if(p.bankroll<p.low)p.low=p.bankroll;
+  if(p.bankroll<p.strategy.base)p.busted=true;
 }
 
-// ─── ROLL ───
-function doRoll(){
-  const cfg=getConfig();
-  if(!placeBets(cfg)){
-    banner.className='result-banner result-lose';
-    banner.textContent='Not enough bankroll!';
-    G.autoRunning=false;
-    updateUI();return null;
+// ─── TABLE PHASE TRANSITION ───
+function advanceTable(total){
+  if(tablePhase==='comeout'&&[4,5,6,8,9,10].includes(total)){
+    tablePoint=total;tablePhase='point';
+  }else if(tablePhase==='point'&&total===7){
+    tablePoint=0;tablePhase='comeout';
+    players.forEach(p=>{if(!p.busted)p.activeBets=[];});
+  }else if(tablePhase==='point'&&total===tablePoint){
+    tablePoint=0;tablePhase='comeout';
   }
+}
 
+// ─── SINGLE ROLL ───
+function doOneRoll(){
   const d1=Math.floor(Math.random()*6)+1;
   const d2=Math.floor(Math.random()*6)+1;
   const total=d1+d2;
-  drawDie(die1,d1);drawDie(die2,d2);
+  rollCount++;rollCounts[total]++;
 
-  G.rolls++;
-  G.rollCounts[total]++;
+  // Place bets before roll
+  players.forEach(p=>placeBetsFor(p));
+  // Resolve
+  players.forEach(p=>resolveFor(p,total));
+  // Phase change (after resolving bets, so 7-out clears bets)
+  advanceTable(total);
+  // Record bankroll
+  players.forEach(p=>p.bankrollHistory.push(p.bankroll));
 
-  const result=resolveRoll(d1,d2);
-
-  // Banner
-  const msg=result.results.join(' | ')||('Rolled '+total);
-  if(result.type==='win'){banner.className='result-banner result-win';banner.textContent=msg;}
-  else if(result.type==='lose'){banner.className='result-banner result-lose';banner.textContent=msg;}
-  else if(G.phase==='point'){banner.className='result-banner result-point';banner.textContent=msg;}
-  else{banner.className='result-banner result-neutral';banner.textContent=msg;}
-
-  // History
-  G.history.unshift({roll:G.rolls,d1,d2,total,msg,pl:result.pl});
-  if(G.history.length>200)G.history.pop();
-
-  updateUI();
-  return result;
+  history.push({n:rollCount,d1,d2,total,phase:tablePhase==='point'?'Point: '+tablePoint:'Come Out'});
+  return {d1,d2,total};
 }
 
-// ─── UPDATE UI ───
-function updateUI(){
-  const profit=G.bankroll-G.startBankroll;
-  $('sBankroll').textContent='$'+G.bankroll.toFixed(2);
-  $('sProfit').textContent=(profit>=0?'+$':'-$')+Math.abs(profit).toFixed(2);
-  $('sProfit').style.color=profit>=0?'var(--green)':'var(--red)';
-  $('sRolls').textContent=G.rolls;
-  $('sWins').textContent=G.wins;
-  $('sLosses').textContent=G.losses;
-  const total=G.wins+G.losses;
-  $('sWinRate').textContent=total?((G.wins/total*100).toFixed(1)+'%'):'0%';
+// ─── RUN SIMULATION ───
+async function runSim(){
+  if(simRunning)return;
+  simRunning=true;
+  $('runBtn').disabled=true;$('runBtn').textContent='Running...';
 
-  // Puck
-  if(G.phase==='point'){
-    $('puckArea').innerHTML='<span class="point-marker">POINT: '+G.point+'</span>';
-  }else{
-    $('puckArea').innerHTML='<span class="off-marker">OFF - Come Out Roll</span>';
+  // Reset state
+  const br=+$('globalBankroll').value||200;
+  tablePoint=0;tablePhase='comeout';rollCount=0;history=[];
+  for(let i=2;i<=12;i++)rollCounts[i]=0;
+  players.forEach(p=>{
+    p.bankroll=br;p.startBankroll=br;p.wins=0;p.losses=0;
+    p.peak=br;p.low=br;p.activeBets=[];p.bankrollHistory=[br];p.busted=false;
+  });
+
+  const total=Math.min(+$('simCount').value||500,100000);
+  $('rollMax').textContent=total;
+
+  const BATCH=500;
+  let done=0;
+  while(done<total){
+    const end=Math.min(done+BATCH,total);
+    for(let i=done;i<end;i++){
+      const r=doOneRoll();
+      if(i===total-1||i===end-1){
+        drawDie($('die1'),r.d1);drawDie($('die2'),r.d2);
+        $('rollTotal').textContent=r.total;
+        $('rollNum').textContent=rollCount;
+      }
+    }
+    done=end;
+    // Yield to UI every batch
+    if(done<total)await new Promise(r=>setTimeout(r,0));
   }
 
-  // Active bets display
-  let betsHtml='';
-  G.activeBets.forEach(b=>{
-    let name=b.type;
-    if(b.type==='place')name='Place '+b.number;
-    if(b.type==='come'&&b.stage==='point')name='Come ('+b.number+')';
-    if(b.type==='dontcome'&&b.stage==='point')name="DC ("+b.number+')';
-    betsHtml+='<div class="bet-row"><span class="bet-name">'+name+'</span><span class="bet-amt">$'+b.amount.toFixed(2)+'</span></div>';
-  });
-  $('activeBets').innerHTML=betsHtml||'<div style="text-align:center;color:var(--text2);font-size:.85em">No active bets</div>';
+  updatePuck();
+  renderPlayerCards();
+  renderLeaderboard();
+  renderChart();
+  renderHistory();
+  renderDist();
 
-  // History
-  let hHtml='';
-  G.history.slice(0,50).forEach(h=>{
-    const cls=h.pl>0?'win':h.pl<0?'lose':'';
-    hHtml+='<tr><td>'+h.roll+'</td><td>'+h.d1+'-'+h.d2+'</td><td>'+h.total+'</td><td>'+h.msg.substring(0,40)+'</td><td class="'+cls+'">'+(h.pl>=0?'+':'')+h.pl.toFixed(2)+'</td></tr>';
-  });
-  $('historyBody').innerHTML=hHtml;
+  simRunning=false;
+  $('runBtn').disabled=false;$('runBtn').textContent='Run Simulation';
+}
 
-  // Roll distribution
-  const maxCount=Math.max(1,...Object.values(G.rollCounts));
-  let distHtml='';
+// ─── UI RENDERING ───
+function updatePuck(){
+  const pk=$('puck');
+  if(tablePhase==='point'){pk.className='puck puck-on';pk.textContent='POINT: '+tablePoint;}
+  else{pk.className='puck puck-off';pk.textContent='OFF';}
+}
+
+function renderPlayerCards(){
+  let html='';
+  players.forEach((p,i)=>{
+    const profit=p.bankroll-p.startBankroll;
+    const profitStr=(profit>=0?'+':'')+profit.toFixed(2);
+    const profitColor=profit>=0?'var(--green)':'var(--red)';
+    const wr=p.wins+p.losses>0?((p.wins/(p.wins+p.losses)*100).toFixed(1)+'%'):'0%';
+    html+=`<div class="player-card${p.busted?' busted':''}" data-idx="${i}">
+      <div class="p-header">
+        <span class="p-color" style="background:${p.color}"></span>
+        <span class="p-name">${esc(p.name)}</span>
+        <button class="p-remove" onclick="removePlayer(${i})" title="Remove">&times;</button>
+      </div>
+      <div class="p-stats">
+        <div class="p-stat"><div class="v">$${p.bankroll.toFixed(2)}</div><div class="l">Bankroll</div></div>
+        <div class="p-stat"><div class="v" style="color:${profitColor}">${profitStr}</div><div class="l">Net P/L</div></div>
+        <div class="p-stat"><div class="v">${wr}</div><div class="l">Win Rate</div></div>
+      </div>
+      <div class="p-strategy"><strong>Strategy:</strong> ${esc(strategyLabel(p.strategy))}${p.busted?' <span style="color:var(--red)">[BUSTED]</span>':''}</div>
+      <button class="btn btn-secondary btn-sm" style="width:100%;margin-top:6px" onclick="editPlayer(${i})">Edit Strategy</button>
+    </div>`;
+  });
+  $('playersGrid').innerHTML=html;
+}
+
+function renderLeaderboard(){
+  const sorted=[...players].sort((a,b)=>b.bankroll-a.bankroll);
+  let html='';
+  sorted.forEach((p,i)=>{
+    const profit=p.bankroll-p.startBankroll;
+    const cls=profit>=0?'win':'lose';
+    const wr=p.wins+p.losses>0?((p.wins/(p.wins+p.losses)*100).toFixed(1)+'%'):'0%';
+    html+=`<tr>
+      <td style="color:${p.color};font-weight:700">${i+1}</td>
+      <td><span style="color:${p.color}">${esc(p.name)}</span>${p.busted?' <span class="lose">[B]</span>':''}</td>
+      <td style="font-size:.75em;color:var(--text2)">${esc(strategyLabel(p.strategy))}</td>
+      <td>$${p.bankroll.toFixed(2)}</td>
+      <td class="${cls}">${(profit>=0?'+':'')+profit.toFixed(2)}</td>
+      <td>${wr}</td>
+      <td style="color:var(--green)">$${p.peak.toFixed(2)}</td>
+      <td style="color:var(--red)">$${p.low.toFixed(2)}</td>
+    </tr>`;
+  });
+  $('leaderBody').innerHTML=html;
+}
+
+function renderChart(){
+  const canvas=$('chartCanvas');
+  const ctx=canvas.getContext('2d');
+  const rect=canvas.parentElement.getBoundingClientRect();
+  canvas.width=rect.width*2;canvas.height=rect.height*2;
+  ctx.scale(2,2);
+  const W=rect.width,H=rect.height;
+  ctx.clearRect(0,0,W,H);
+
+  if(!players.length||!players[0].bankrollHistory.length)return;
+
+  // Find min/max across all players
+  let minVal=Infinity,maxVal=-Infinity;
+  players.forEach(p=>{
+    p.bankrollHistory.forEach(v=>{if(v<minVal)minVal=v;if(v>maxVal)maxVal=v;});
+  });
+  const pad=20;const range=maxVal-minVal||1;
+
+  // Grid lines
+  ctx.strokeStyle='rgba(255,255,255,.06)';ctx.lineWidth=.5;
+  for(let i=0;i<=4;i++){
+    const y=pad+(H-pad*2)*(i/4);
+    ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(W-pad,y);ctx.stroke();
+  }
+
+  // Starting bankroll line
+  const startY=pad+(H-pad*2)*(1-(players[0].startBankroll-minVal)/range);
+  ctx.strokeStyle='rgba(255,255,255,.15)';ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(pad,startY);ctx.lineTo(W-pad,startY);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Plot each player
+  const maxPts=players[0].bankrollHistory.length;
+  players.forEach(p=>{
+    const pts=p.bankrollHistory;
+    ctx.strokeStyle=p.color;ctx.lineWidth=1.5;ctx.globalAlpha=.85;
+    ctx.beginPath();
+    for(let i=0;i<pts.length;i++){
+      const x=pad+(W-pad*2)*(i/(maxPts-1||1));
+      const y=pad+(H-pad*2)*(1-(pts[i]-minVal)/range);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.stroke();ctx.globalAlpha=1;
+  });
+
+  // Y-axis labels
+  ctx.fillStyle='rgba(255,255,255,.4)';ctx.font='10px sans-serif';ctx.textAlign='right';
+  for(let i=0;i<=4;i++){
+    const val=maxVal-range*(i/4);
+    const y=pad+(H-pad*2)*(i/4);
+    ctx.fillText('$'+val.toFixed(0),pad-4,y+3);
+  }
+
+  // Legend
+  let lx=pad+10;
+  ctx.font='10px sans-serif';ctx.textAlign='left';
+  players.forEach(p=>{
+    ctx.fillStyle=p.color;
+    ctx.fillRect(lx,H-12,10,8);
+    ctx.fillStyle='rgba(255,255,255,.6)';
+    ctx.fillText(p.name,lx+14,H-5);
+    lx+=ctx.measureText(p.name).width+28;
+  });
+}
+
+function renderHistory(){
+  const last=history.slice(-50).reverse();
+  let html='';
+  last.forEach(h=>{
+    html+=`<tr><td>${h.n}</td><td>${h.d1}-${h.d2}</td><td>${h.total}</td><td>${h.phase}</td></tr>`;
+  });
+  $('historyBody').innerHTML=html;
+}
+
+function renderDist(){
+  const max=Math.max(1,...Object.values(rollCounts));
+  let html='';
   for(let i=2;i<=12;i++){
-    const pct=G.rolls?(G.rollCounts[i]/G.rolls*100).toFixed(1):0;
-    const w=maxCount?(G.rollCounts[i]/maxCount*100):0;
-    distHtml+='<div class="chart-bar"><span class="bar-label">'+i+'</span><div class="bar" style="width:'+w+'%;min-width:2px"></div><span class="bar-val">'+G.rollCounts[i]+' ('+pct+'%)</span></div>';
+    const pct=rollCount?(rollCounts[i]/rollCount*100).toFixed(1):0;
+    const w=max?(rollCounts[i]/max*100):0;
+    html+=`<div class="chart-bar"><span class="bar-label">${i}</span><div class="bar" style="width:${w}%;min-width:2px"></div><span class="bar-val">${rollCounts[i]} (${pct}%)</span></div>`;
   }
-  $('rollDist').innerHTML=distHtml;
-
-  // Button states
-  $('rollBtn').disabled=G.autoRunning;
-  $('autoBtn').textContent=G.autoRunning?'Stop':'Auto-Roll';
+  $('rollDist').innerHTML=html;
 }
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ─── MODAL ───
+let editIdx=-1;
+function openModal(idx){
+  editIdx=idx;
+  const p=idx>=0?players[idx]:null;
+  const s=p?p.strategy:defaultStrategy();
+  $('modalTitle').textContent=idx>=0?'Edit Strategy':'Add Player';
+  $('mName').value=p?p.name:'Player '+(players.length+1);
+  $('mBet').value=s.base;
+  $('m-oddsMult').value=s.oddsMult||2;
+  BET_KEYS.forEach(k=>{const el=$('m-'+k);if(el)el.checked=!!s[k];});
+  $('modalOverlay').classList.add('open');
+}
+
+function closeModal(){$('modalOverlay').classList.remove('open');}
+
+function saveModal(){
+  const name=$('mName').value.trim()||'Player';
+  const base=Math.max(5,+$('mBet').value||5);
+  const s={base,oddsMult:+$('m-oddsMult').value||2};
+  BET_KEYS.forEach(k=>{const el=$('m-'+k);s[k]=el?el.checked:false;});
+
+  if(editIdx>=0){
+    players[editIdx].name=name;
+    players[editIdx].strategy=s;
+  }else{
+    const color=COLORS[players.length%COLORS.length];
+    players.push(createPlayer(name,color,s));
+  }
+  closeModal();
+  renderPlayerCards();
+}
+
+function applyPreset(key){
+  const p=PRESETS[key];if(!p)return;
+  BET_KEYS.forEach(k=>{const el=$('m-'+k);if(el)el.checked=!!p[k];});
+  if(p.base)$('mBet').value=p.base;
+  if(p.oddsMult)$('m-oddsMult').value=p.oddsMult;
+}
+
+window.editPlayer=function(i){openModal(i);};
+window.removePlayer=function(i){
+  if(players.length<=1)return;
+  players.splice(i,1);renderPlayerCards();
+};
 
 // ─── EVENTS ───
-$('rollBtn').addEventListener('click',()=>doRoll());
-
-$('autoBtn').addEventListener('click',()=>{
-  if(G.autoRunning){G.autoRunning=false;$('autoBtn').textContent='Auto-Roll';$('rollBtn').disabled=false;return;}
-  G.autoRunning=true;
-  const count=+$('simCount').value||100;
-  let done=0;
-  function step(){
-    if(!G.autoRunning||done>=count||G.bankroll<5){
-      G.autoRunning=false;updateUI();return;
-    }
-    doRoll();done++;
-    if(G.speed===0){
-      // Instant: batch remaining
-      while(G.autoRunning&&done<count&&G.bankroll>=5){doRoll();done++;}
-      G.autoRunning=false;updateUI();
-    }else{
-      setTimeout(step,G.speed);
-    }
-  }
-  step();
-});
-
+$('addPlayerBtn').addEventListener('click',()=>openModal(-1));
+$('runBtn').addEventListener('click',runSim);
 $('resetBtn').addEventListener('click',()=>{
-  const cfg=getConfig();
-  G.bankroll=cfg.bankroll;G.startBankroll=cfg.bankroll;
-  G.point=0;G.phase='comeout';G.rolls=0;G.wins=0;G.losses=0;
-  G.activeBets=[];G.history=[];G.autoRunning=false;
-  for(let i=2;i<=12;i++)G.rollCounts[i]=0;
-  drawDie(die1,1);drawDie(die2,2);
-  banner.className='result-banner result-neutral';banner.textContent='Roll the dice!';
-  updateUI();
+  initDefaults();
+  tablePoint=0;tablePhase='comeout';rollCount=0;history=[];
+  for(let i=2;i<=12;i++)rollCounts[i]=0;
+  drawDie($('die1'),1);drawDie($('die2'),2);
+  $('rollTotal').textContent='-';$('rollNum').textContent='0';$('rollMax').textContent='0';
+  updatePuck();renderPlayerCards();
+  $('leaderBody').innerHTML='';$('historyBody').innerHTML='';$('rollDist').innerHTML='';
+  const c=$('chartCanvas');c.getContext('2d').clearRect(0,0,c.width,c.height);
+});
+$('modalCancel').addEventListener('click',closeModal);
+$('modalSave').addEventListener('click',saveModal);
+$('modalOverlay').addEventListener('click',e=>{if(e.target===$('modalOverlay'))closeModal();});
+document.querySelectorAll('.preset-btn').forEach(b=>b.addEventListener('click',()=>applyPreset(b.dataset.preset)));
+$('refToggle').addEventListener('click',()=>{
+  $('refPanel').classList.toggle('open');
+  $('refToggle').innerHTML=$('refPanel').classList.contains('open')?'&#9650; Odds & Payouts Reference':'&#9660; Odds & Payouts Reference';
 });
 
-updateUI();
+// Handle window resize for chart
+window.addEventListener('resize',()=>{if(players[0]&&players[0].bankrollHistory.length>1)renderChart();});
+
+// ─── INIT UI ───
+renderPlayerCards();
 </script>
 </body>
 </html>
