@@ -2,761 +2,414 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Craps Simulator - Multiplayer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1">
+<title>Rich's Craps Table</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#1a1a2e;--surface:#16213e;--surface2:#0f3460;--accent:#e94560;--accent2:#ffbd39;--green:#00b894;--red:#e94560;--text:#eee;--text2:#aaa;--border:#2a3a5e}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-header{text-align:center;padding:16px;background:var(--surface);border-bottom:3px solid var(--accent)}
-header h1{font-size:1.5em}
-header h1 span{color:var(--accent2)}
-header p{color:var(--text2);font-size:.82em;margin-top:4px}
-.main{max-width:1400px;margin:0 auto;padding:16px}
-.panel{background:var(--surface);border-radius:10px;padding:16px;border:1px solid var(--border);margin-bottom:16px}
-.panel h2{font-size:1.05em;margin-bottom:10px;color:var(--accent2);border-bottom:1px solid var(--border);padding-bottom:6px}
-.panel h3{font-size:.9em;margin:10px 0 4px;color:var(--accent2)}
-label{display:block;margin:6px 0 3px;font-size:.82em;color:var(--text2)}
-input,select{width:100%;padding:7px 8px;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.85em}
-input:focus,select:focus{outline:none;border-color:var(--accent2)}
-input[type="checkbox"]{width:auto;margin-right:4px}
-.btn{display:inline-block;padding:9px 18px;border:none;border-radius:6px;cursor:pointer;font-size:.9em;font-weight:600;transition:all .15s}
-.btn-primary{background:var(--green);color:#fff}
-.btn-primary:hover{filter:brightness(1.15)}
-.btn-danger{background:var(--red);color:#fff}
-.btn-danger:hover{filter:brightness(1.15)}
-.btn-secondary{background:var(--surface2);color:var(--text)}
-.btn-secondary:hover{filter:brightness(1.3)}
-.btn:disabled{opacity:.4;cursor:not-allowed}
-.btn-sm{padding:5px 10px;font-size:.8em}
+html,body{width:100%;min-height:100vh;overflow-x:hidden;font-family:'Georgia','Times New Roman',serif;background:#1a0a00;color:#eee;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 
-/* Views */
-.view{display:none}.view.active{display:block}
+/* ──── PAGE BACKGROUND ──── */
+body{background:radial-gradient(ellipse at center,#2a1508 0%,#0d0500 70%,#000 100%)}
 
-/* Lobby */
-.room-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:12px 0}
-.room-card{background:var(--bg);border-radius:8px;padding:14px;border:1px solid var(--border);cursor:pointer;transition:border-color .2s}
-.room-card:hover{border-color:var(--accent2)}
-.room-card .rc-code{font-size:1.2em;font-weight:700;color:var(--accent2)}
-.room-card .rc-info{font-size:.8em;color:var(--text2);margin-top:4px}
-.create-room-form{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end}
-@media(max-width:700px){.create-room-form{grid-template-columns:1fr 1fr}}
+.app{max-width:900px;margin:0 auto;padding:12px 10px 30px;position:relative}
 
-/* Game */
-.game-top{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
-.dice-strip{display:flex;align-items:center;gap:12px}
-.dice{display:inline-block;width:52px;height:52px;background:#fff;border-radius:9px;position:relative;box-shadow:0 3px 10px rgba(0,0,0,.3)}
-.dot{position:absolute;width:9px;height:9px;background:#333;border-radius:50%}
-.puck{font-weight:700;font-size:.9em;padding:3px 12px;border-radius:12px}
-.puck-on{background:var(--accent);color:#fff}
-.puck-off{background:var(--text2);color:var(--bg)}
-.roll-total{font-size:1.5em;font-weight:800;color:var(--accent2)}
-.roll-info{font-size:.82em;color:var(--text2)}
-.room-code-badge{background:var(--surface2);padding:6px 14px;border-radius:8px;font-size:.9em}
-.room-code-badge strong{color:var(--accent2);font-size:1.1em}
+/* ──── HEADER ──── */
+.hdr{text-align:center;padding:10px 0 8px}
+.hdr h1{font-size:2em;color:#ffd700;text-shadow:0 0 30px rgba(255,215,0,.5),0 2px 4px rgba(0,0,0,.8);font-variant:small-caps;letter-spacing:3px}
+.hdr p{font-size:.75em;color:#b89860;font-style:italic;margin-top:2px}
 
-/* Strategy config */
-.strat-panel{background:var(--bg);border-radius:8px;padding:12px;border:1px solid var(--border)}
-.strat-row{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.82em}
-.strat-row label{display:inline-flex;align-items:center;margin:2px 0;cursor:pointer}
-.preset-bar{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
-.preset-btn{padding:4px 10px;font-size:.76em;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer}
-.preset-btn:hover{border-color:var(--accent2);color:var(--accent2)}
-.strat-inline{display:flex;gap:8px;align-items:end;flex-wrap:wrap}
-.strat-inline .field{display:flex;flex-direction:column;gap:2px}
-.strat-inline .field label{margin:0;font-size:.78em}
-.strat-inline .field input,.strat-inline .field select{width:80px}
+/* ──── BALANCE BAR ──── */
+.bal-bar{display:flex;justify-content:space-between;background:linear-gradient(180deg,#2c1a0e,#1a0e05);border:2px solid #8b6914;border-radius:10px;padding:8px 14px;margin:8px 0;box-shadow:inset 0 1px 0 rgba(255,215,0,.15),0 4px 12px rgba(0,0,0,.5)}
+.bal-item{text-align:center;flex:1}
+.bal-item .lbl{font-size:.6em;color:#b89860;text-transform:uppercase;letter-spacing:1.5px}
+.bal-item .val{font-size:1.15em;font-weight:700;color:#ffd700;font-family:'Georgia',serif}
+.bal-item .val.pos{color:#4ecb71}.bal-item .val.neg{color:#e94560}
 
-/* Results */
-.results-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:900px){.results-grid{grid-template-columns:1fr}}
-table{width:100%;border-collapse:collapse;font-size:.82em}
-th,td{padding:5px 8px;text-align:left;border-bottom:1px solid var(--border)}
-th{background:var(--surface2);position:sticky;top:0;color:var(--accent2);font-size:.78em}
-.win{color:var(--green)}.lose{color:var(--red)}
+/* ──── CRAPS TABLE ──── */
+.table-outer{position:relative;margin:12px 0;padding:14px;background:linear-gradient(180deg,#5c3a1e,#3e2210);border-radius:22px;border:6px solid #8b6914;box-shadow:0 0 0 3px #5a4210,0 0 0 8px #3e2a0e,0 12px 40px rgba(0,0,0,.7),inset 0 2px 0 rgba(255,215,0,.1)}
+.table-rail{position:absolute;inset:0;border-radius:22px;border:3px solid rgba(139,105,20,.3);pointer-events:none}
 
-.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin:10px 0}
-.stat-box{background:var(--bg);border-radius:6px;padding:8px;text-align:center}
-.stat-box .v{font-size:1.2em;font-weight:700}
-.stat-box .l{font-size:.7em;color:var(--text2)}
+/* Felt surface */
+.felt{background:linear-gradient(170deg,#1a6b35 0%,#0f5c28 30%,#0a4a1f 60%,#084218 100%);border-radius:14px;padding:10px;position:relative;box-shadow:inset 0 0 60px rgba(0,0,0,.4),inset 0 0 20px rgba(0,0,0,.2)}
+.felt::before{content:'';position:absolute;inset:0;border-radius:14px;background:url("data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='4' height='4' fill='%23000' opacity='.03'/%3E%3Ccircle cx='1' cy='1' r='.5' fill='%23000' opacity='.04'/%3E%3C/svg%3E");opacity:.6;pointer-events:none}
 
-.chart-container{position:relative;height:220px;background:var(--bg);border-radius:8px;overflow:hidden}
-canvas{width:100%!important;height:100%!important}
+/* ──── BOARD SECTIONS ──── */
+.board-section{margin-bottom:6px}
+.board-section:last-child{margin-bottom:0}
+.section-label{font-size:.55em;text-transform:uppercase;color:rgba(255,255,255,.35);letter-spacing:2px;margin-bottom:3px;padding-left:6px;font-family:sans-serif}
 
-.chart-bar{display:flex;align-items:center;gap:6px;margin:2px 0;font-size:.78em}
-.chart-bar .bar{height:14px;background:var(--accent2);border-radius:3px;transition:width .3s}
-.chart-bar .bar-label{width:22px;text-align:right;color:var(--text2)}
-.chart-bar .bar-val{color:var(--text2);min-width:30px}
+.row{display:grid;gap:4px}
+.r2{grid-template-columns:1fr 1fr}
+.r3{grid-template-columns:1fr 1fr 1fr}
+.r4{grid-template-columns:1fr 1fr 1fr 1fr}
+.r6{grid-template-columns:repeat(6,1fr)}
 
-/* Scoreboard from sheet */
-.sb-loading{text-align:center;color:var(--text2);padding:20px;font-size:.9em}
-.refresh-btn{float:right;font-size:.78em}
+/* ──── BET CELLS ──── */
+.bb{position:relative;border:2px solid rgba(255,255,255,.25);border-radius:6px;padding:10px 4px;text-align:center;cursor:pointer;transition:all .15s;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.15)}
+.bb:active{transform:scale(.96);border-color:#ffd700}
+.bb .name{font-size:clamp(.72em,2.8vw,.9em);font-weight:700;line-height:1.15;text-transform:uppercase;letter-spacing:.5px;text-shadow:1px 1px 3px rgba(0,0,0,.7)}
+.bb .odds{font-size:clamp(.52em,1.8vw,.65em);color:#ffe680;margin-top:2px;font-style:italic}
+.bb .bet-amt{position:absolute;top:2px;right:4px;font-size:.58em;background:#ffd700;color:#1a0a00;border-radius:8px;padding:1px 5px;font-weight:700;display:none;font-family:sans-serif}
+.bb .bet-amt.show{display:block}
+.bb.sel{border-color:#ffd700;box-shadow:0 0 14px rgba(255,215,0,.4);background:rgba(255,215,0,.12)}
 
-/* Odds ref */
-.ref-toggle{cursor:pointer;color:var(--accent2);font-size:.82em;display:inline-flex;align-items:center;gap:4px}
-.ref-panel{display:none;margin-top:8px}
-.ref-panel.open{display:block}
-.odds-table td:nth-child(2),.odds-table td:nth-child(3){text-align:center}
-.odds-table th:nth-child(2),.odds-table th:nth-child(3){text-align:center}
+/* Cell colors */
+.bb.pass-bg{background:rgba(0,80,0,.35);border-color:rgba(255,255,255,.3)}
+.bb.dp-bg{background:rgba(120,0,0,.3);border-color:rgba(255,255,255,.3)}
+.bb.come-bg{background:rgba(0,60,80,.3);border-color:rgba(255,255,255,.3)}
+.bb.num-bg{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.35)}
+.bb.field-bg{background:rgba(80,0,120,.2);border-color:rgba(255,255,255,.3)}
+.bb.prop-bg{background:rgba(120,60,0,.3);border-color:rgba(255,255,255,.3)}
 
-.copy-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 24px;border-radius:8px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
-.copy-toast.show{opacity:1}
+/* Point marker */
+.pt-mark{position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:24px;height:24px;background:radial-gradient(circle at 40% 35%,#fff,#ffd700 40%,#d4a800);border-radius:50%;font-size:.5em;font-weight:900;color:#1a0a00;display:none;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.5),0 0 12px rgba(255,215,0,.6);z-index:3;border:2px solid #8b6914;font-family:sans-serif}
+.pt-mark.on{display:flex;animation:ptPulse 1.5s ease-in-out infinite}
+@keyframes ptPulse{0%,100%{box-shadow:0 2px 8px rgba(0,0,0,.5),0 0 8px rgba(255,215,0,.4)}50%{box-shadow:0 2px 8px rgba(0,0,0,.5),0 0 20px rgba(255,215,0,.8)}}
+
+/* Win/Lose flash */
+.bb.win-flash{animation:winFlash .4s ease 3;border-color:#4ecb71;box-shadow:0 0 20px rgba(78,203,113,.5)}
+.bb.lose-flash{animation:loseFlash .4s ease;border-color:#e94560;box-shadow:0 0 20px rgba(233,69,96,.4)}
+@keyframes winFlash{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes loseFlash{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ──── DICE AREA ──── */
+.dice-area{display:flex;align-items:center;justify-content:center;gap:16px;padding:14px 0 8px}
+.die-3d{width:56px;height:56px;background:linear-gradient(145deg,#ff2d2d,#cc0000);border-radius:9px;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:6px;box-shadow:0 3px 0 #8b0000,0 5px 15px rgba(0,0,0,.6),inset 0 1px 2px rgba(255,255,255,.3);transition:transform .15s}
+.die-3d.rolling{animation:dieRoll .6s cubic-bezier(.25,.46,.45,.94)}
+@keyframes dieRoll{
+  0%{transform:rotateX(0) rotateZ(0) scale(1)}
+  20%{transform:rotateX(180deg) rotateZ(90deg) scale(1.2)}
+  40%{transform:rotateX(360deg) rotateZ(180deg) scale(.9)}
+  60%{transform:rotateX(540deg) rotateZ(270deg) scale(1.1)}
+  80%{transform:rotateX(680deg) rotateZ(340deg) scale(1)}
+  100%{transform:rotateX(720deg) rotateZ(360deg) scale(1)}
+}
+.pip{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff,#e0e0e0);box-shadow:inset 0 1px 3px rgba(0,0,0,.35);opacity:0;transition:opacity .1s}
+.pip.on{opacity:1}
+
+/* ──── RESULT ──── */
+.result-area{text-align:center;padding:4px 0 6px}
+.result-total{font-size:2.4em;font-weight:800;color:#ffd700;text-shadow:0 0 16px rgba(255,215,0,.6),0 2px 4px rgba(0,0,0,.6);min-height:1.2em;font-family:'Georgia',serif}
+.result-msg{font-size:.82em;color:#ffe680;min-height:1.2em;font-style:italic}
+
+/* ──── ROLL BUTTON ──── */
+.roll-btn{display:block;margin:6px auto 10px;width:75%;max-width:320px;padding:14px;font-size:1.2em;font-weight:800;color:#1a0a00;background:linear-gradient(180deg,#ffd700 0%,#daa520 50%,#b8860b 100%);border:3px solid #8b6914;border-radius:50px;cursor:pointer;box-shadow:0 4px 0 #7a5a0a,0 6px 20px rgba(255,215,0,.3),inset 0 1px 0 rgba(255,255,255,.4);transition:transform .1s,box-shadow .1s;letter-spacing:1.5px;font-variant:small-caps;font-family:'Georgia',serif;text-shadow:0 1px 0 rgba(255,255,255,.3)}
+.roll-btn:active{transform:translateY(4px);box-shadow:0 0 0 #7a5a0a,0 2px 10px rgba(255,215,0,.3)}
+.roll-btn:disabled{opacity:.45;transform:none}
+
+/* ──── GAME STATUS ──── */
+.status{text-align:center;padding:8px;background:rgba(0,0,0,.4);border:1px solid rgba(139,105,20,.3);border-radius:8px;margin:0 0 8px}
+.status .phase{font-size:1em;font-weight:700;color:#ffd700;font-variant:small-caps;letter-spacing:1px}
+.status .sub{font-size:.75em;color:#b89860;font-style:italic}
+
+/* ──── CHIP SELECTOR ──── */
+.chips-wrap{text-align:center;margin:8px 0}
+.chips-wrap .chips-label{font-size:.55em;text-transform:uppercase;color:#b89860;letter-spacing:2px;margin-bottom:4px}
+.chips{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.chip{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7em;font-weight:700;color:#fff;cursor:pointer;transition:transform .15s,box-shadow .15s;position:relative;font-family:sans-serif}
+.chip::before{content:'';position:absolute;inset:3px;border-radius:50%;border:2px dashed rgba(255,255,255,.5)}
+.chip:active{transform:scale(.9)}
+.chip.sel{transform:scale(1.15);box-shadow:0 0 16px rgba(255,215,0,.6)}
+.chip.sel::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid #ffd700}
+.c5{background:radial-gradient(circle at 35% 30%,#ff6b6b,#e74c3c 50%,#c0392b);box-shadow:0 3px 0 #922b21,0 4px 10px rgba(0,0,0,.4)}
+.c10{background:radial-gradient(circle at 35% 30%,#5dade2,#2980b9 50%,#2471a3);box-shadow:0 3px 0 #1a5276,0 4px 10px rgba(0,0,0,.4)}
+.c25{background:radial-gradient(circle at 35% 30%,#58d68d,#27ae60 50%,#1e8449);box-shadow:0 3px 0 #145a32,0 4px 10px rgba(0,0,0,.4)}
+.c100{background:radial-gradient(circle at 35% 30%,#566573,#2c3e50 50%,#1a252f);box-shadow:0 3px 0 #0d1117,0 4px 10px rgba(0,0,0,.4)}
+.c500{background:radial-gradient(circle at 35% 30%,#bb8fce,#8e44ad 50%,#6c3483);box-shadow:0 3px 0 #4a235a,0 4px 10px rgba(0,0,0,.4)}
+
+/* ──── CLEAR BTN ──── */
+.clear-btn{display:block;margin:8px auto;padding:8px 28px;font-size:.8em;font-weight:600;color:#ddd;background:linear-gradient(180deg,#5c3a1e,#3e2210);border:2px solid #8b6914;border-radius:20px;cursor:pointer;font-family:'Georgia',serif;letter-spacing:.5px}
+.clear-btn:active{transform:scale(.95)}
+
+/* ──── HISTORY ──── */
+.history{margin-top:10px;background:rgba(0,0,0,.35);border:1px solid rgba(139,105,20,.2);border-radius:10px;padding:8px 10px}
+.history h3{font-size:.75em;color:#b89860;margin-bottom:5px;font-variant:small-caps;letter-spacing:1px}
+.history .rolls{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.history .roll-chip{flex-shrink:0;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:.78em;font-weight:700;font-family:sans-serif}
+.history .roll-chip.r7{border-color:#e94560;color:#e94560}
+.history .roll-chip.point-hit{border-color:#4ecb71;color:#4ecb71}
+.history .roll-chip.craps{border-color:#ff6b6b;color:#ff6b6b}
+.history .roll-chip.natural{border-color:#ffd700;color:#ffd700}
+
+/* ──── DECORATIVE DIAMONDS on felt ──── */
+.felt-deco{position:absolute;pointer-events:none;font-size:10px;color:rgba(255,215,0,.08)}
 </style>
 </head>
 <body>
 
-<header>
-<h1>Craps <span>Simulator</span></h1>
-<p>Multiplayer strategy tester - join a room, pick your strategy, compare results</p>
-</header>
+<div class="app">
+  <div class="hdr">
+    <h1>Rich's Craps Table</h1>
+    <p>Place your bets on the felt, then shoot the dice</p>
+  </div>
 
-<div class="main">
+  <!-- Balance -->
+  <div class="bal-bar">
+    <div class="bal-item"><div class="lbl">Balance</div><div class="val" id="bal">$1,000</div></div>
+    <div class="bal-item"><div class="lbl">Total Bet</div><div class="val" id="totalBet">$0</div></div>
+    <div class="bal-item"><div class="lbl">Last Win</div><div class="val pos" id="lastWin">$0</div></div>
+  </div>
 
-<!-- ========== LOBBY VIEW ========== -->
-<div class="view active" id="lobbyView">
-<div class="panel">
-<h2>Join or Create a Room</h2>
-<p style="font-size:.85em;color:var(--text2);margin-bottom:12px">Everyone in the same room gets identical dice rolls. Pick your own strategy and see who comes out on top.</p>
+  <!-- Craps Table -->
+  <div class="table-outer">
+    <div class="table-rail"></div>
+    <div class="felt">
 
-<div class="create-room-form">
-<div><label>Room Code</label><input type="text" id="newRoomCode" placeholder="e.g. FRIDAY" maxlength="12"></div>
-<div><label>Number of Rolls</label><input type="number" id="newRoomRolls" value="500" min="10" max="100000"></div>
-<div><label>Min Bet ($)</label><input type="number" id="newRoomBet" value="5" min="5" step="1"></div>
-<div><button class="btn btn-primary" id="createRoomBtn" style="margin-top:18px">Create Room</button></div>
-</div>
+      <!-- Pass / Don't Pass -->
+      <div class="board-section">
+        <div class="section-label">Line Bets</div>
+        <div class="row r2">
+          <div class="bb pass-bg" data-bet="pass"><div class="name">Pass Line</div><div class="odds">Pays 1:1</div><div class="bet-amt" id="amt-pass"></div></div>
+          <div class="bb dp-bg" data-bet="dontPass"><div class="name">Don't Pass</div><div class="odds">Pays 1:1</div><div class="bet-amt" id="amt-dontPass"></div></div>
+        </div>
+      </div>
 
-<h3 style="margin-top:16px">Available Rooms</h3>
-<div id="roomList" class="room-grid"><div class="sb-loading">Loading rooms...</div></div>
-</div>
+      <!-- Come / Don't Come -->
+      <div class="board-section">
+        <div class="row r2">
+          <div class="bb come-bg" data-bet="come"><div class="name">Come</div><div class="odds">Pays 1:1</div><div class="bet-amt" id="amt-come"></div></div>
+          <div class="bb dp-bg" data-bet="dontCome"><div class="name">Don't Come</div><div class="odds">Pays 1:1</div><div class="bet-amt" id="amt-dontCome"></div></div>
+        </div>
+      </div>
 
-<div class="panel">
-<h2>Join by Code</h2>
-<div style="display:flex;gap:8px;align-items:end">
-<div style="flex:1"><label>Enter Room Code</label><input type="text" id="joinCode" placeholder="DEMO1" maxlength="12"></div>
-<button class="btn btn-primary" id="joinBtn" style="margin-top:18px">Join</button>
-</div>
-</div>
+      <!-- Place Numbers -->
+      <div class="board-section">
+        <div class="section-label">Place Bets</div>
+        <div class="row r6">
+          <div class="bb num-bg" data-bet="place4"><div class="name">4</div><div class="odds">9:5</div><div class="pt-mark">ON</div><div class="bet-amt" id="amt-place4"></div></div>
+          <div class="bb num-bg" data-bet="place5"><div class="name">5</div><div class="odds">7:5</div><div class="pt-mark">ON</div><div class="bet-amt" id="amt-place5"></div></div>
+          <div class="bb num-bg" data-bet="place6"><div class="name">6</div><div class="odds">7:6</div><div class="pt-mark">ON</div><div class="bet-amt" id="amt-place6"></div></div>
+          <div class="bb num-bg" data-bet="place8"><div class="name">8</div><div class="odds">7:6</div><div class="pt-mark">ON</div><div class="bet-amt" id="amt-place8"></div></div>
+          <div class="bb num-bg" data-bet="place9"><div class="name">9</div><div class="odds">7:5</div><div class="pt-mark">ON</div><div class="bet-amt" id="amt-place9"></div></div>
+          <div class="bb num-bg" data-bet="place10"><div class="name">10</div><div class="odds">9:5</div><div class="pt-mark">ON</div><div class="bet-amt" id="amt-place10"></div></div>
+        </div>
+      </div>
 
-<div class="panel">
-<span class="ref-toggle" id="refToggle1">&#9660; Odds & Payouts Reference</span>
-<div class="ref-panel" id="refPanel1">
-<table class="odds-table" style="margin-top:8px">
-<thead><tr><th>Bet</th><th>Pays</th><th>House Edge</th></tr></thead>
-<tbody>
-<tr><td>Pass Line</td><td>1:1</td><td>1.41%</td></tr>
-<tr><td>Don't Pass</td><td>1:1</td><td>1.36%</td></tr>
-<tr><td>Pass/DP Odds</td><td>True odds</td><td>0%</td></tr>
-<tr><td>Come / Don't Come</td><td>1:1</td><td>1.41% / 1.36%</td></tr>
-<tr><td>Place 6/8</td><td>7:6</td><td>1.52%</td></tr>
-<tr><td>Place 5/9</td><td>7:5</td><td>4.00%</td></tr>
-<tr><td>Place 4/10</td><td>9:5</td><td>6.67%</td></tr>
-<tr><td>Field</td><td>1:1 (2x on 2,12)</td><td>5.56%</td></tr>
-<tr><td>Any 7</td><td>4:1</td><td>16.67%</td></tr>
-<tr><td>Any Craps</td><td>7:1</td><td>11.11%</td></tr>
-<tr style="border-top:2px solid var(--border)"><td colspan="3" style="color:var(--accent2);font-weight:600;padding-top:8px">Hardways</td></tr>
-<tr><td>Hard 6 / Hard 8</td><td>9:1</td><td>9.09%</td></tr>
-<tr><td>Hard 4 / Hard 10</td><td>7:1</td><td>11.11%</td></tr>
-<tr style="border-top:2px solid var(--border)"><td colspan="3" style="color:var(--accent2);font-weight:600;padding-top:8px">Bonus / Prop Bets</td></tr>
-<tr><td>Horn (4-way)</td><td>15:1 or 30:1</td><td>12.50%</td></tr>
-<tr><td>C&E (Craps+Eleven)</td><td>3:1 / 7:1</td><td>11.11%</td></tr>
-<tr><td>Yo (Eleven)</td><td>15:1</td><td>11.11%</td></tr>
-<tr><td>Aces (Snake Eyes)</td><td>30:1</td><td>13.89%</td></tr>
-<tr><td>Midnight (Boxcars)</td><td>30:1</td><td>13.89%</td></tr>
-</tbody>
-</table>
-<table class="odds-table" style="margin-top:8px">
-<thead><tr><th>Point</th><th>Pass Odds</th><th>Don't Pass Odds</th></tr></thead>
-<tbody>
-<tr><td>4 or 10</td><td>2:1</td><td>1:2</td></tr>
-<tr><td>5 or 9</td><td>3:2</td><td>2:3</td></tr>
-<tr><td>6 or 8</td><td>6:5</td><td>5:6</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
+      <!-- Dice Area (on the felt) -->
+      <div class="dice-area">
+        <div class="die-3d" id="d1"><div class="pip" data-p="1"></div><div class="pip" data-p="2"></div><div class="pip" data-p="3"></div><div class="pip" data-p="4"></div><div class="pip" data-p="5"></div><div class="pip" data-p="6"></div><div class="pip" data-p="7"></div><div class="pip" data-p="8"></div><div class="pip" data-p="9"></div></div>
+        <div class="die-3d" id="d2"><div class="pip" data-p="1"></div><div class="pip" data-p="2"></div><div class="pip" data-p="3"></div><div class="pip" data-p="4"></div><div class="pip" data-p="5"></div><div class="pip" data-p="6"></div><div class="pip" data-p="7"></div><div class="pip" data-p="8"></div><div class="pip" data-p="9"></div></div>
+      </div>
 
-<!-- ========== GAME VIEW ========== -->
-<div class="view" id="gameView">
-<div class="panel">
-<div class="game-top">
-<span class="room-code-badge">Room: <strong id="gRoomCode">-</strong></span>
-<div class="dice-strip">
-<span class="puck puck-off" id="gPuck">OFF</span>
-<div class="dice" id="die1"></div>
-<div class="dice" id="die2"></div>
-<span class="roll-total" id="gTotal">-</span>
-</div>
-<span class="roll-info">Roll <strong id="gRollNum">0</strong> / <span id="gRollMax">0</span></span>
-<div style="flex:1"></div>
-<button class="btn btn-secondary btn-sm" id="backToLobby">Back to Lobby</button>
-</div>
-</div>
+      <!-- Result -->
+      <div class="result-area">
+        <div class="result-total" id="resTotal"></div>
+        <div class="result-msg" id="resMsg">Place your bets and shoot!</div>
+      </div>
 
-<!-- Strategy Config -->
-<div class="panel">
-<h2>Your Strategy</h2>
-<div class="strat-inline">
-<div class="field"><label>Your Name</label><input type="text" id="gName" value="Player" maxlength="20" style="width:130px"></div>
-<div class="field"><label>Bankroll ($)</label><input type="number" id="gBankroll" value="200" min="5" style="width:90px"></div>
-<div class="field"><label>Base Bet ($)</label><input type="number" id="gBet" value="5" min="5" style="width:70px"></div>
-<div class="field"><label>Odds</label>
-<select id="gOdds" style="width:60px"><option value="1">1x</option><option value="2">2x</option><option value="3" selected>3x</option><option value="5">5x</option><option value="10">10x</option></select></div>
-</div>
-<div class="preset-bar">
-<strong style="font-size:.78em;color:var(--text2)">Presets:</strong>
-<button class="preset-btn" data-p="pass">Pass Only</button>
-<button class="preset-btn" data-p="passodds">Pass+Odds</button>
-<button class="preset-btn" data-p="dark">Dark Side</button>
-<button class="preset-btn" data-p="iron">Iron Cross</button>
-<button class="preset-btn" data-p="place68">Place 6&8</button>
-<button class="preset-btn" data-p="field">Field Warrior</button>
-<button class="preset-btn" data-p="degen">All-In Degen</button>
-<button class="preset-btn" data-p="hardway">Hardways</button>
-<button class="preset-btn" data-p="hornhigh">Horn High</button>
-<button class="preset-btn" data-p="propmaster">Prop Master</button>
-</div>
-<div class="strat-row">
-<label><input type="checkbox" id="g-pass" checked> Pass</label>
-<label><input type="checkbox" id="g-dontpass"> Don't Pass</label>
-<label><input type="checkbox" id="g-passodds"> Pass Odds</label>
-<label><input type="checkbox" id="g-dontpassodds"> DP Odds</label>
-<label><input type="checkbox" id="g-come"> Come</label>
-<label><input type="checkbox" id="g-dontcome"> Don't Come</label>
-<label><input type="checkbox" id="g-place4"> Pl 4</label>
-<label><input type="checkbox" id="g-place5"> Pl 5</label>
-<label><input type="checkbox" id="g-place6"> Pl 6</label>
-<label><input type="checkbox" id="g-place8"> Pl 8</label>
-<label><input type="checkbox" id="g-place9"> Pl 9</label>
-<label><input type="checkbox" id="g-place10"> Pl 10</label>
-<label><input type="checkbox" id="g-field"> Field</label>
-<label><input type="checkbox" id="g-any7"> Any 7</label>
-<label><input type="checkbox" id="g-anyCraps"> Any Craps</label>
-</div>
-<h3 style="margin-top:6px;color:var(--accent2)">Hardways</h3>
-<div class="strat-row">
-<label><input type="checkbox" id="g-hard4"> Hard 4 (7:1)</label>
-<label><input type="checkbox" id="g-hard6"> Hard 6 (9:1)</label>
-<label><input type="checkbox" id="g-hard8"> Hard 8 (9:1)</label>
-<label><input type="checkbox" id="g-hard10"> Hard 10 (7:1)</label>
-</div>
-<h3 style="margin-top:6px;color:var(--accent2)">Bonus / Prop Bets</h3>
-<div class="strat-row">
-<label><input type="checkbox" id="g-horn"> Horn (4-way)</label>
-<label><input type="checkbox" id="g-ce"> C&E</label>
-<label><input type="checkbox" id="g-yo"> Yo 11 (15:1)</label>
-<label><input type="checkbox" id="g-aces"> Aces/2 (30:1)</label>
-<label><input type="checkbox" id="g-midnight"> Midnight/12 (30:1)</label>
-</div>
-<div style="margin-top:10px;display:flex;gap:8px">
-<button class="btn btn-primary" id="runBtn">Run Simulation</button>
-<button class="btn btn-secondary" id="shareBtn" style="display:none">Share Link</button>
-</div>
-</div>
+      <!-- Field -->
+      <div class="board-section">
+        <div class="row">
+          <div class="bb field-bg" data-bet="field"><div class="name">Field &mdash; 2 &bull; 3 &bull; 4 &bull; 9 &bull; 10 &bull; 11 &bull; 12</div><div class="odds">Double on 2 or 12</div><div class="bet-amt" id="amt-field"></div></div>
+        </div>
+      </div>
 
-<!-- My Results -->
-<div class="panel" id="myResultsPanel" style="display:none">
-<h2>Your Results</h2>
-<div class="stats-row" id="myStats"></div>
-<button class="btn btn-primary btn-sm" id="submitScoreBtn">Submit Score to Leaderboard</button>
-<span id="submitStatus" style="font-size:.82em;color:var(--green);margin-left:8px"></span>
-</div>
+      <!-- Props -->
+      <div class="board-section">
+        <div class="section-label">Proposition Bets</div>
+        <div class="row r4">
+          <div class="bb prop-bg" data-bet="any7"><div class="name">Any 7</div><div class="odds">4:1</div><div class="bet-amt" id="amt-any7"></div></div>
+          <div class="bb prop-bg" data-bet="anyCraps"><div class="name">Any Craps</div><div class="odds">7:1</div><div class="bet-amt" id="amt-anyCraps"></div></div>
+          <div class="bb prop-bg" data-bet="yo"><div class="name">Yo 11</div><div class="odds">15:1</div><div class="bet-amt" id="amt-yo"></div></div>
+          <div class="bb prop-bg" data-bet="midnight"><div class="name">Midnight 12</div><div class="odds">30:1</div><div class="bet-amt" id="amt-midnight"></div></div>
+        </div>
+      </div>
 
-<!-- Leaderboard from Sheet -->
-<div class="panel">
-<h2>Leaderboard <button class="btn btn-secondary btn-sm refresh-btn" id="refreshLB">Refresh</button></h2>
-<div id="leaderboard"><div class="sb-loading">Run your simulation, then submit your score. Refresh to see others.</div></div>
-</div>
+    </div><!-- /felt -->
+  </div><!-- /table-outer -->
 
-<!-- Charts & History -->
-<div class="results-grid">
-<div class="panel">
-<h2>Bankroll Over Time</h2>
-<div class="chart-container"><canvas id="chartCanvas"></canvas></div>
-</div>
-<div class="panel">
-<h2>Roll Distribution</h2>
-<div id="rollDist"></div>
-</div>
-</div>
-</div>
+  <!-- Roll Button -->
+  <button class="roll-btn" id="rollBtn">Shoot the Dice</button>
 
-</div>
+  <!-- Game Status -->
+  <div class="status">
+    <div class="phase" id="phase">Come Out Roll</div>
+    <div class="sub" id="phaseSub">Pass line: 7 or 11 wins, 2/3/12 loses</div>
+  </div>
 
-<div class="copy-toast" id="toast">Link copied!</div>
+  <!-- Chips -->
+  <div class="chips-wrap">
+    <div class="chips-label">Select Chip</div>
+    <div class="chips">
+      <div class="chip c5 sel" data-v="5">$5</div>
+      <div class="chip c10" data-v="10">$10</div>
+      <div class="chip c25" data-v="25">$25</div>
+      <div class="chip c100" data-v="100">$100</div>
+      <div class="chip c500" data-v="500">$500</div>
+    </div>
+  </div>
+
+  <button class="clear-btn" id="clearBtn">Clear All Bets</button>
+
+  <!-- Roll History -->
+  <div class="history">
+    <h3>Roll History</h3>
+    <div class="rolls" id="histRolls"></div>
+  </div>
+</div>
 
 <script>
-// ─── CONFIG ───
-const SHEET_ID='1uj4SA8HTv6Y4evQ7FeARM-yCt9ZRQkCxC6XPskFEaQs';
-const FORM_URL='https://docs.google.com/forms/d/e/1FAIpQLSfLRAd3toys0BuqVp5ib0czjpMFWdOJN0EAUhuqdFePuyEGcA/formResponse';
-const FORM_FIELDS={roomCode:'entry.1970828205',playerName:'entry.1038658274',strategy:'entry.870414517',bankrollStart:'entry.1603024685',bankrollEnd:'entry.1569869403',netPL:'entry.252585777',winRate:'entry.2128141216',peak:'entry.74908948',low:'entry.187168067'};
-const BET_KEYS=['pass','dontpass','passodds','dontpassodds','come','dontcome','place4','place5','place6','place8','place9','place10','field','any7','anyCraps','hard4','hard6','hard8','hard10','horn','ce','yo','aces','midnight'];
-const PRESETS={
-  pass:{pass:true},
-  passodds:{pass:true,passodds:true},
-  dark:{dontpass:true,dontpassodds:true},
-  iron:{place5:true,place6:true,place8:true,field:true},
-  place68:{pass:true,passodds:true,place6:true,place8:true},
-  field:{field:true},
-  degen:{pass:true,passodds:true,come:true,place6:true,place8:true,field:true,any7:true},
-  hardway:{pass:true,hard6:true,hard8:true},
-  hornhigh:{horn:true,yo:true},
-  propmaster:{horn:true,ce:true,yo:true,aces:true,midnight:true,any7:true,anyCraps:true}
-};
+// State
+let balance=1000,chipVal=5,bets={},point=null,rolling=false,history=[];
+const FACES={1:[5],2:[3,7],3:[3,5,7],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
 
+// Dice rendering
+function setFace(el,val){
+  el.querySelectorAll('.pip').forEach(p=>p.classList.remove('on'));
+  FACES[val].forEach(pos=>{const p=el.querySelector(`[data-p="${pos}"]`);if(p)p.classList.add('on')});
+}
+setFace(document.getElementById('d1'),3);
+setFace(document.getElementById('d2'),4);
+
+// Helpers
+const fmt=n=>'$'+n.toLocaleString();
 const $=id=>document.getElementById(id);
 
-// ─── SEEDED PRNG (mulberry32) ───
-function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
-function seedFromString(s){let h=0;for(let i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0;}return h;}
-
-// ─── READ GOOGLE SHEET (published, no auth) ───
-async function readSheet(tab){
-  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tab)}`;
-  const res=await fetch(url);
-  const text=await res.text();
-  // Response is: /*O_o*/\ngoogle.visualization.Query.setResponse({...});
-  const json=JSON.parse(text.match(/\{.*\}/s)[0]);
-  const cols=json.table.cols.map(c=>c.label);
-  return json.table.rows.map(r=>{
-    const obj={};
-    r.c.forEach((cell,i)=>{obj[cols[i]]=cell?cell.v:null;});
-    return obj;
+function updateUI(){
+  $('bal').textContent=fmt(balance);
+  const total=Object.values(bets).reduce((s,v)=>s+v,0);
+  $('totalBet').textContent=fmt(total);
+  document.querySelectorAll('.bb').forEach(el=>{
+    const key=el.dataset.bet,amt=el.querySelector('.bet-amt');
+    if(bets[key]){amt.textContent=fmt(bets[key]);amt.classList.add('show');el.classList.add('sel')}
+    else{amt.classList.remove('show');el.classList.remove('sel')}
   });
 }
 
-// ─── WRITE TO GOOGLE FORM (no-cors POST) ───
-function submitForm(data){
-  const body=new URLSearchParams();
-  Object.entries(data).forEach(([k,v])=>{if(FORM_FIELDS[k])body.append(FORM_FIELDS[k],v);});
-  // Fire-and-forget (no-cors won't return readable response)
-  return fetch(FORM_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body.toString()});
+function updatePoint(){
+  document.querySelectorAll('.pt-mark').forEach(m=>m.classList.remove('on'));
+  if(point){
+    const el=document.querySelector(`[data-bet="place${point}"] .pt-mark`);
+    if(el)el.classList.add('on');
+    $('phase').textContent='Point Phase';
+    $('phaseSub').textContent=`Point is ${point}. Hit ${point} to win, 7 loses.`;
+  }else{
+    $('phase').textContent='Come Out Roll';
+    $('phaseSub').textContent='Pass line: 7 or 11 wins, 2/3/12 loses';
+  }
 }
 
-// ─── VIEWS ───
-function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$(id).classList.add('active');}
-
-// ─── LOBBY ───
-let rooms=[];
-async function loadRooms(){
-  $('roomList').innerHTML='<div class="sb-loading">Loading rooms...</div>';
-  try{
-    rooms=await readSheet('Rooms');
-    if(!rooms.length){$('roomList').innerHTML='<div class="sb-loading">No rooms yet. Create one above!</div>';return;}
-    $('roomList').innerHTML=rooms.map(r=>`
-      <div class="room-card" data-code="${esc(r.roomCode||'')}">
-        <div class="rc-code">${esc(r.roomCode||'')}</div>
-        <div class="rc-info">${r.rolls||500} rolls &middot; $${r.minBet||5} min bet</div>
-        <div class="rc-info">by ${esc(r.createdBy||'?')} &middot; ${r.createdAt||''}</div>
-      </div>`).join('');
-    document.querySelectorAll('.room-card').forEach(c=>c.addEventListener('click',()=>joinRoom(c.dataset.code)));
-  }catch(e){$('roomList').innerHTML='<div class="sb-loading">Could not load rooms. Check connection.</div>';}
+// Roll
+function roll(){
+  if(rolling)return;
+  const totalBet=Object.values(bets).reduce((s,v)=>s+v,0);
+  if(totalBet===0){$('resMsg').textContent='Place a bet first!';return;}
+  rolling=true;
+  $('rollBtn').disabled=true;
+  const d1=$('d1'),d2=$('d2');
+  d1.classList.add('rolling');d2.classList.add('rolling');
+  document.querySelectorAll('.bb').forEach(b=>b.classList.remove('win-flash','lose-flash'));
+  let cnt=0;
+  const iv=setInterval(()=>{
+    setFace(d1,Math.ceil(Math.random()*6));
+    setFace(d2,Math.ceil(Math.random()*6));
+    if(++cnt>=12)clearInterval(iv);
+  },50);
+  setTimeout(()=>{
+    d1.classList.remove('rolling');d2.classList.remove('rolling');
+    const v1=Math.ceil(Math.random()*6),v2=Math.ceil(Math.random()*6),total=v1+v2;
+    setFace(d1,v1);setFace(d2,v2);
+    $('resTotal').textContent=total;
+    resolve(total,v1===v2);
+    addHistory(total);
+    rolling=false;
+    $('rollBtn').disabled=false;
+  },700);
 }
 
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+// Resolve
+function resolve(total,hard){
+  let win=0;const winners=[],losers=[];
+  if(point===null){
+    if(total===7||total===11){
+      $('resMsg').textContent='Natural! Pass line wins!';
+      if(bets.pass){win+=bets.pass*2;winners.push('pass')}
+      if(bets.dontPass){losers.push('dontPass')}
+      if(bets.come){win+=bets.come*2;winners.push('come')}
+      if(bets.dontCome){losers.push('dontCome')}
+    }else if(total===2||total===3||total===12){
+      const craps12=total===12;
+      $('resMsg').textContent=craps12?"Craps 12! Push on Don't Pass":"Craps! Don't Pass wins!";
+      if(bets.pass){losers.push('pass')}
+      if(bets.dontPass&&!craps12){win+=bets.dontPass*2;winners.push('dontPass')}
+      else if(bets.dontPass&&craps12){win+=bets.dontPass;winners.push('dontPass')}
+      if(bets.come){losers.push('come')}
+      if(bets.dontCome&&!craps12){win+=bets.dontCome*2;winners.push('dontCome')}
+      else if(bets.dontCome&&craps12){win+=bets.dontCome;winners.push('dontCome')}
+    }else{point=total;$('resMsg').textContent=`Point is ${total}!`;updatePoint()}
+  }else{
+    if(total===point){
+      $('resMsg').textContent=`${total}! Point hit! Pass wins!`;
+      if(bets.pass){win+=bets.pass*2;winners.push('pass')}
+      if(bets.dontPass){losers.push('dontPass')}
+      if(bets.come){win+=bets.come*2;winners.push('come')}
+      if(bets.dontCome){losers.push('dontCome')}
+      point=null;updatePoint();
+    }else if(total===7){
+      $('resMsg').textContent="Seven out! Don't Pass wins!";
+      if(bets.pass){losers.push('pass')}
+      if(bets.dontPass){win+=bets.dontPass*2;winners.push('dontPass')}
+      if(bets.come){losers.push('come')}
+      if(bets.dontCome){win+=bets.dontCome*2;winners.push('dontCome')}
+      ['place4','place5','place6','place8','place9','place10'].forEach(k=>{if(bets[k])losers.push(k)});
+      point=null;updatePoint();
+    }else{$('resMsg').textContent=`Rolled ${total}. Point is still ${point}.`}
+  }
 
-// ─── CREATE ROOM (writes to sheet via form... but form is for Scores) ───
-// For rooms: we encode in URL and add to sheet via Maton from the host's side.
-// Simple approach: rooms are created via the URL. Anyone can create a room by
-// sharing a link. The sheet "Rooms" tab is pre-populated and can be edited manually.
-// For now, creating a room just generates a shareable link with the config.
-$('createRoomBtn').addEventListener('click',()=>{
-  const code=($('newRoomCode').value.trim()||randomCode()).toUpperCase();
-  const rolls=+$('newRoomRolls').value||500;
-  const bet=Math.max(5,+$('newRoomBet').value||5);
-  const url=`${location.origin}${location.pathname}?room=${encodeURIComponent(code)}&rolls=${rolls}&bet=${bet}`;
-  // Copy to clipboard
-  navigator.clipboard.writeText(url).then(()=>showToast('Room link copied! Share it with friends.')).catch(()=>{});
-  joinRoom(code,rolls,bet);
-});
-
-function randomCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let r='';for(let i=0;i<5;i++)r+=c[Math.floor(Math.random()*c.length)];return r;}
-
-// ─── JOIN ROOM ───
-let currentRoom=null;
-function joinRoom(code,rolls,bet){
-  code=code.toUpperCase().trim();
-  if(!code)return;
-  // Check if room exists in loaded sheet data
-  const sheetRoom=rooms.find(r=>(r.roomCode||'').toUpperCase()===code);
-  currentRoom={
-    code,
-    seed:seedFromString(code),
-    rolls:rolls||sheetRoom?.rolls||500,
-    bet:bet||sheetRoom?.minBet||5
-  };
-  $('gRoomCode').textContent=currentRoom.code;
-  $('gRollMax').textContent=currentRoom.rolls;
-  $('gBet').value=currentRoom.bet;
-  $('gBet').min=currentRoom.bet;
-  $('myResultsPanel').style.display='none';
-  $('submitStatus').textContent='';
-  $('shareBtn').style.display='none';
-  showView('gameView');
-  loadLeaderboard();
-}
-
-$('joinBtn').addEventListener('click',()=>{const c=$('joinCode').value.trim();if(c)joinRoom(c);});
-$('backToLobby').addEventListener('click',()=>{showView('lobbyView');loadRooms();});
-
-// ─── LEADERBOARD ───
-// Combines: URL scores (instant) + Sheet scores (synced)
-async function loadLeaderboard(){
-  if(!currentRoom)return;
-  $('leaderboard').innerHTML='<div class="sb-loading">Loading scores...</div>';
-
-  let allScores=[];
-
-  // 1. URL scores (instant, from shared link)
-  urlScores.forEach(s=>{
-    allScores.push({name:s.n,strategy:s.s,end:s.be,pl:s.pl,wr:s.wr,peak:s.pk,low:s.lo,src:'link'});
+  // Place bets
+  const placeOdds={4:9/5,5:7/5,6:7/6,8:7/6,9:7/5,10:9/5};
+  [4,5,6,8,9,10].forEach(n=>{
+    const k='place'+n;
+    if(bets[k]&&total===n&&!winners.includes(k)){win+=bets[k]+Math.floor(bets[k]*placeOdds[n]);winners.push(k)}
   });
 
-  // 2. Sheet scores (synced from form responses)
-  try{
-    const sheetScores=await readSheet('Scores');
-    sheetScores.filter(s=>(s.roomCode||'').toUpperCase()===currentRoom.code).forEach(s=>{
-      // Deduplicate: skip if same name+strategy already in URL scores
-      const dup=allScores.find(u=>u.name===(s.playerName||'')&&u.strategy===(s.strategy||''));
-      if(!dup){
-        allScores.push({name:s.playerName||'?',strategy:s.strategy||'',end:parseFloat(s.bankrollEnd)||0,pl:parseFloat(s.netPL)||0,wr:s.winRate||'0%',peak:parseFloat(s.peak)||0,low:parseFloat(s.low)||0,src:'sheet'});
-      }
-    });
-  }catch(e){}
+  // Field
+  if(bets.field){
+    if([2,3,4,9,10,11,12].includes(total)){const m=(total===2||total===12)?3:2;win+=bets.field*m;winners.push('field')}
+    else{losers.push('field')}
+  }
 
-  renderLeaderboardTable(allScores);
+  // Props
+  if(bets.any7){if(total===7){win+=bets.any7*5;winners.push('any7')}else losers.push('any7')}
+  if(bets.anyCraps){if([2,3,12].includes(total)){win+=bets.anyCraps*8;winners.push('anyCraps')}else losers.push('anyCraps')}
+  if(bets.yo){if(total===11){win+=bets.yo*16;winners.push('yo')}else losers.push('yo')}
+  if(bets.midnight){if(total===12){win+=bets.midnight*31;winners.push('midnight')}else losers.push('midnight')}
+
+  winners.forEach(k=>{const el=document.querySelector(`[data-bet="${k}"]`);if(el)el.classList.add('win-flash')});
+  losers.forEach(k=>{const el=document.querySelector(`[data-bet="${k}"]`);if(el)el.classList.add('lose-flash');delete bets[k]});
+
+  balance+=win;
+  const lw=$('lastWin');lw.textContent=fmt(win);lw.className='val '+(win>0?'pos':'');
+  updateUI();
 }
 
-function renderUrlLeaderboard(){
-  let allScores=urlScores.map(s=>({name:s.n,strategy:s.s,end:s.be,pl:s.pl,wr:s.wr,peak:s.pk,low:s.lo,src:'link'}));
-  renderLeaderboardTable(allScores);
-}
-
-function renderLeaderboardTable(allScores){
-  if(!allScores.length){$('leaderboard').innerHTML='<div class="sb-loading">No scores yet. Run your sim and submit!</div>';return;}
-  allScores.sort((a,b)=>b.end-a.end);
-  let html='<table><thead><tr><th>#</th><th>Player</th><th>Strategy</th><th>Final $</th><th>Net P/L</th><th>Win%</th><th>Peak</th><th>Low</th></tr></thead><tbody>';
-  allScores.forEach((s,i)=>{
-    html+=`<tr><td>${i+1}</td><td>${esc(s.name)}</td><td style="font-size:.75em;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.strategy)}</td><td>$${s.end.toFixed(2)}</td><td class="${s.pl>=0?'win':'lose'}">${s.pl>=0?'+':''}${s.pl.toFixed(2)}</td><td>${esc(s.wr)}</td><td class="win">$${s.peak.toFixed(2)}</td><td class="lose">$${s.low.toFixed(2)}</td></tr>`;
+// History
+function addHistory(total){
+  history.unshift(total);if(history.length>30)history.pop();
+  const c=$('histRolls');c.innerHTML='';
+  history.forEach(t=>{
+    const d=document.createElement('div');d.className='roll-chip';
+    if(t===7)d.className+=' r7';
+    else if(t===11)d.className+=' natural';
+    else if([2,3,12].includes(t))d.className+=' craps';
+    else if(point&&t===point)d.className+=' point-hit';
+    d.textContent=t;c.appendChild(d);
   });
-  html+='</tbody></table>';
-  $('leaderboard').innerHTML=html;
 }
 
-$('refreshLB').addEventListener('click',loadLeaderboard);
-
-// ─── PRESETS ───
-document.querySelectorAll('.preset-btn').forEach(b=>b.addEventListener('click',()=>{
-  const p=PRESETS[b.dataset.p];if(!p)return;
-  BET_KEYS.forEach(k=>{const el=$('g-'+k);if(el)el.checked=!!p[k];});
-}));
-
-// ─── SHARE ───
-$('shareBtn').addEventListener('click',()=>{
-  if(!currentRoom)return;
-  const url=buildShareUrl();
-  navigator.clipboard.writeText(url).then(()=>showToast('Link copied with all scores!')).catch(()=>{});
+// Events
+$('rollBtn').addEventListener('click',roll);
+document.querySelectorAll('.chip').forEach(c=>{
+  c.addEventListener('click',()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');chipVal=+c.dataset.v});
 });
-
-// ─── DICE ───
-const dotPos={1:[[50,50]],2:[[25,25],[75,75]],3:[[25,25],[50,50],[75,75]],4:[[25,25],[75,25],[25,75],[75,75]],5:[[25,25],[75,25],[50,50],[25,75],[75,75]],6:[[25,25],[75,25],[25,50],[75,50],[25,75],[75,75]]};
-function drawDie(el,val){el.innerHTML='';(dotPos[val]||[]).forEach(([x,y])=>{const d=document.createElement('div');d.className='dot';d.style.left=(x-8)+'%';d.style.top=(y-8)+'%';el.appendChild(d);});}
-drawDie($('die1'),1);drawDie($('die2'),2);
-
-// ─── PAYOUT HELPERS ───
-function passOddsPay(pt,b){return pt===4||pt===10?b*2:pt===5||pt===9?b*1.5:b*1.2;}
-function dpOddsPay(pt,b){return pt===4||pt===10?b*.5:pt===5||pt===9?b*(2/3):b*(5/6);}
-function placePay(n,b){return n===6||n===8?b*(7/6):n===5||n===9?b*(7/5):b*(9/5);}
-
-// ─── SIMULATION ENGINE ───
-function runSimulation(){
-  if(!currentRoom)return;
-  const rng=mulberry32(currentRoom.seed);
-  const totalRolls=currentRoom.rolls;
-  const bankrollStart=+$('gBankroll').value||200;
-  const baseBet=Math.max(currentRoom.bet,+$('gBet').value||5);
-  const oddsMult=+$('gOdds').value||3;
-  const strat={base:baseBet,oddsMult};
-  BET_KEYS.forEach(k=>{const el=$('g-'+k);strat[k]=el?el.checked:false;});
-
-  let bankroll=bankrollStart,peak=bankrollStart,low=bankrollStart;
-  let wins=0,losses=0,point=0,phase='comeout',activeBets=[];
-  const bankrollHist=[bankrollStart];
-  const rollCounts={};for(let i=2;i<=12;i++)rollCounts[i]=0;
-  let lastD1=1,lastD2=2,lastTotal=3;
-
-  for(let r=0;r<totalRolls;r++){
-    // Place bets
-    if(bankroll<baseBet)break;
-    let need=0;const pending=[];
-    if(strat.pass&&phase==='comeout'){pending.push({t:'pass',a:baseBet});need+=baseBet;}
-    if(strat.dontpass&&phase==='comeout'){pending.push({t:'dontpass',a:baseBet});need+=baseBet;}
-    if(strat.passodds&&phase==='point'&&!activeBets.find(b=>b.t==='passodds')){const a=baseBet*oddsMult;pending.push({t:'passodds',a});need+=a;}
-    if(strat.dontpassodds&&phase==='point'&&!activeBets.find(b=>b.t==='dontpassodds')){const a=baseBet*oddsMult;pending.push({t:'dontpassodds',a});need+=a;}
-    if(strat.come&&phase==='point'){pending.push({t:'come',a:baseBet,s:'w'});need+=baseBet;}
-    if(strat.dontcome&&phase==='point'){pending.push({t:'dontcome',a:baseBet,s:'w'});need+=baseBet;}
-    if(phase==='point'){[4,5,6,8,9,10].forEach(n=>{if(strat['place'+n]&&!activeBets.find(b=>b.t==='place'&&b.n===n)){let a=baseBet;if((n===6||n===8)&&a%6)a=Math.ceil(a/6)*6;pending.push({t:'place',a,n});need+=a;}});}
-    if(strat.field){pending.push({t:'field',a:baseBet});need+=baseBet;}
-    if(strat.any7){pending.push({t:'any7',a:baseBet});need+=baseBet;}
-    if(strat.anyCraps){pending.push({t:'anyCraps',a:baseBet});need+=baseBet;}
-    // Hardways (stay up until they hit or 7-out, or easy way)
-    if(phase==='point'){
-      if(strat.hard4&&!activeBets.find(b=>b.t==='hard4')){pending.push({t:'hard4',a:baseBet});need+=baseBet;}
-      if(strat.hard6&&!activeBets.find(b=>b.t==='hard6')){pending.push({t:'hard6',a:baseBet});need+=baseBet;}
-      if(strat.hard8&&!activeBets.find(b=>b.t==='hard8')){pending.push({t:'hard8',a:baseBet});need+=baseBet;}
-      if(strat.hard10&&!activeBets.find(b=>b.t==='hard10')){pending.push({t:'hard10',a:baseBet});need+=baseBet;}
-    }
-    // Single-roll prop bets
-    if(strat.horn){const ha=Math.max(4,Math.ceil(baseBet/4)*4);pending.push({t:'horn',a:ha});need+=ha;}
-    if(strat.ce){pending.push({t:'ce',a:baseBet});need+=baseBet;}
-    if(strat.yo){pending.push({t:'yo',a:baseBet});need+=baseBet;}
-    if(strat.aces){pending.push({t:'aces',a:baseBet});need+=baseBet;}
-    if(strat.midnight){pending.push({t:'midnight',a:baseBet});need+=baseBet;}
-    if(need>bankroll)break;
-    pending.forEach(b=>{bankroll-=b.a;activeBets.push(b);});
-
-    // Roll dice (seeded)
-    const d1=Math.floor(rng()*6)+1;
-    const d2=Math.floor(rng()*6)+1;
-    const total=d1+d2;
-    lastD1=d1;lastD2=d2;lastTotal=total;
-    rollCounts[total]++;
-
-    // Resolve bets
-    let net=0;const rm=[];
-    activeBets.forEach((b,i)=>{
-      if(b.t==='pass'){if(phase==='comeout'){if(total===7||total===11){net+=b.a*2;rm.push(i);}else if([2,3,12].includes(total))rm.push(i);}else{if(total===point){net+=b.a*2;rm.push(i);}else if(total===7)rm.push(i);}}
-      if(b.t==='dontpass'){if(phase==='comeout'){if(total===2||total===3){net+=b.a*2;rm.push(i);}else if(total===12){net+=b.a;rm.push(i);}else if(total===7||total===11)rm.push(i);}else{if(total===7){net+=b.a*2;rm.push(i);}else if(total===point)rm.push(i);}}
-      if(b.t==='passodds'){if(total===point){net+=b.a+passOddsPay(point,b.a);rm.push(i);}else if(total===7)rm.push(i);}
-      if(b.t==='dontpassodds'){if(total===7){net+=b.a+dpOddsPay(point,b.a);rm.push(i);}else if(total===point)rm.push(i);}
-      if(b.t==='come'){if(b.s==='w'){if(total===7||total===11){net+=b.a*2;rm.push(i);}else if([2,3,12].includes(total))rm.push(i);else{b.s='p';b.n=total;}}else{if(total===b.n){net+=b.a*2;rm.push(i);}else if(total===7)rm.push(i);}}
-      if(b.t==='dontcome'){if(b.s==='w'){if(total===2||total===3){net+=b.a*2;rm.push(i);}else if(total===12){net+=b.a;rm.push(i);}else if(total===7||total===11)rm.push(i);else{b.s='p';b.n=total;}}else{if(total===7){net+=b.a*2;rm.push(i);}else if(total===b.n)rm.push(i);}}
-      if(b.t==='place'){if(total===b.n){net+=b.a+placePay(b.n,b.a);rm.push(i);}else if(total===7)rm.push(i);}
-      if(b.t==='field'){if([2,3,4,9,10,11,12].includes(total)){let m=1;if(total===2||total===12)m=2;net+=b.a+b.a*m;}rm.push(i);}
-      if(b.t==='any7'){if(total===7)net+=b.a+b.a*4;rm.push(i);}
-      if(b.t==='anyCraps'){if([2,3,12].includes(total))net+=b.a+b.a*7;rm.push(i);}
-      // Hardways: win if doubles match, lose on 7 or easy way
-      if(b.t==='hard4'){if(d1===2&&d2===2){net+=b.a+b.a*7;rm.push(i);}else if(total===4||total===7)rm.push(i);}
-      if(b.t==='hard6'){if(d1===3&&d2===3){net+=b.a+b.a*9;rm.push(i);}else if(total===6||total===7)rm.push(i);}
-      if(b.t==='hard8'){if(d1===4&&d2===4){net+=b.a+b.a*9;rm.push(i);}else if(total===8||total===7)rm.push(i);}
-      if(b.t==='hard10'){if(d1===5&&d2===5){net+=b.a+b.a*7;rm.push(i);}else if(total===10||total===7)rm.push(i);}
-      // Horn: 4-way bet split across 2,3,11,12. Each unit is bet/4.
-      if(b.t==='horn'){
-        const u=b.a/4;
-        if(total===2)net+=u*30+u;       // 30:1 on aces, lose other 3 units
-        else if(total===12)net+=u*30+u;  // 30:1 on midnight
-        else if(total===3)net+=u*15+u;   // 15:1 on ace-deuce
-        else if(total===11)net+=u*15+u;  // 15:1 on yo
-        rm.push(i);
-      }
-      // C&E: half on any craps (7:1), half on yo (15:1)
-      if(b.t==='ce'){
-        const h=b.a/2;
-        if([2,3,12].includes(total))net+=h*7+h;  // craps half wins 7:1
-        else if(total===11)net+=h*15+h;            // yo half wins 15:1
-        rm.push(i);
-      }
-      // Yo (11): pays 15:1
-      if(b.t==='yo'){if(total===11)net+=b.a+b.a*15;rm.push(i);}
-      // Aces (2): pays 30:1
-      if(b.t==='aces'){if(total===2)net+=b.a+b.a*30;rm.push(i);}
-      // Midnight (12): pays 30:1
-      if(b.t==='midnight'){if(total===12)net+=b.a+b.a*30;rm.push(i);}
-    });
-    rm.sort((a,b)=>b-a).forEach(i=>activeBets.splice(i,1));
-    bankroll+=net;
-    if(net>0)wins++;else if(rm.length)losses++;
-    if(bankroll>peak)peak=bankroll;
-    if(bankroll<low)low=bankroll;
-
-    // Phase
-    if(phase==='comeout'&&[4,5,6,8,9,10].includes(total)){point=total;phase='point';}
-    else if(phase==='point'&&total===7){point=0;phase='comeout';activeBets=[];}
-    else if(phase==='point'&&total===point){point=0;phase='comeout';}
-
-    bankrollHist.push(bankroll);
-  }
-
-  // Update dice display
-  drawDie($('die1'),lastD1);drawDie($('die2'),lastD2);
-  $('gTotal').textContent=lastTotal;
-  $('gRollNum').textContent=Math.min(totalRolls,bankrollHist.length-1);
-  if(phase==='point'){$('gPuck').className='puck puck-on';$('gPuck').textContent='POINT: '+point;}
-  else{$('gPuck').className='puck puck-off';$('gPuck').textContent='OFF';}
-
-  // Store results
-  const result={bankrollStart,bankrollEnd:bankroll,netPL:bankroll-bankrollStart,wins,losses,peak,low,bankrollHist,rollCounts,totalRolls:bankrollHist.length-1};
-  showResults(result,strat);
-}
-
-function showResults(r,strat){
-  const profitColor=r.netPL>=0?'var(--green)':'var(--red)';
-  const wr=r.wins+r.losses>0?((r.wins/(r.wins+r.losses)*100).toFixed(1)+'%'):'0%';
-  $('myStats').innerHTML=`
-    <div class="stat-box"><div class="v">$${r.bankrollEnd.toFixed(2)}</div><div class="l">Final Bankroll</div></div>
-    <div class="stat-box"><div class="v" style="color:${profitColor}">${r.netPL>=0?'+':''}$${r.netPL.toFixed(2)}</div><div class="l">Net P/L</div></div>
-    <div class="stat-box"><div class="v">${wr}</div><div class="l">Win Rate</div></div>
-    <div class="stat-box"><div class="v" style="color:var(--green)">$${r.peak.toFixed(2)}</div><div class="l">Peak</div></div>
-    <div class="stat-box"><div class="v" style="color:var(--red)">$${r.low.toFixed(2)}</div><div class="l">Low</div></div>
-    <div class="stat-box"><div class="v">${r.totalRolls}</div><div class="l">Rolls</div></div>`;
-  $('myResultsPanel').style.display='block';
-  $('shareBtn').style.display='inline-block';
-  $('submitStatus').textContent='';
-
-  // Store for submission
-  window._lastResult={...r,winRate:wr,strategy:strategyLabel(strat)};
-
-  renderChart(r.bankrollHist,r.bankrollStart);
-  renderDist(r.rollCounts,r.totalRolls);
-}
-
-function strategyLabel(s){
-  const p=[];
-  if(s.pass)p.push('Pass');if(s.dontpass)p.push("DP");
-  if(s.passodds)p.push(s.oddsMult+'xOdds');if(s.dontpassodds)p.push(s.oddsMult+'xDPO');
-  if(s.come)p.push('Come');if(s.dontcome)p.push('DC');
-  [4,5,6,8,9,10].forEach(n=>{if(s['place'+n])p.push('Pl'+n);});
-  if(s.field)p.push('Field');if(s.any7)p.push('Any7');if(s.anyCraps)p.push('AnyCraps');
-  if(s.hard4)p.push('H4');if(s.hard6)p.push('H6');if(s.hard8)p.push('H8');if(s.hard10)p.push('H10');
-  if(s.horn)p.push('Horn');if(s.ce)p.push('C&E');if(s.yo)p.push('Yo');if(s.aces)p.push('Aces');if(s.midnight)p.push('12');
-  return '$'+s.base+' '+p.join('+');
-}
-
-// ─── URL SCORE TRACKING ───
-// Scores travel in the URL so players can share and compare instantly
-let urlScores=[];
-function parseUrlScores(){
-  const p=new URLSearchParams(location.search);
-  const s=p.get('scores');
-  if(!s)return [];
-  try{return JSON.parse(decodeURIComponent(s));}catch(e){return [];}
-}
-function buildShareUrl(addScore){
-  const scores=[...urlScores];
-  if(addScore)scores.push(addScore);
-  const p=new URLSearchParams();
-  if(currentRoom){
-    p.set('room',currentRoom.code);
-    p.set('rolls',currentRoom.rolls);
-    p.set('bet',currentRoom.bet);
-  }
-  if(scores.length)p.set('scores',JSON.stringify(scores));
-  return `${location.origin}${location.pathname}?${p.toString()}`;
-}
-
-// ─── SUBMIT SCORE ───
-$('submitScoreBtn').addEventListener('click',async()=>{
-  if(!window._lastResult||!currentRoom)return;
-  const r=window._lastResult;
-  const name=$('gName').value.trim()||'Player';
-  $('submitScoreBtn').disabled=true;
-  $('submitStatus').textContent='Submitting...';
-
-  // 1. Submit to Google Form (persistent storage)
-  try{
-    await submitForm({
-      roomCode:currentRoom.code,
-      playerName:name,
-      strategy:r.strategy,
-      bankrollStart:r.bankrollStart.toFixed(2),
-      bankrollEnd:r.bankrollEnd.toFixed(2),
-      netPL:r.netPL.toFixed(2),
-      winRate:r.winRate,
-      peak:r.peak.toFixed(2),
-      low:r.low.toFixed(2)
-    });
-  }catch(e){}
-
-  // 2. Add to URL scores for instant sharing
-  const scoreEntry={n:name,s:r.strategy,bs:r.bankrollStart,be:+r.bankrollEnd.toFixed(2),pl:+r.netPL.toFixed(2),wr:r.winRate,pk:+r.peak.toFixed(2),lo:+r.low.toFixed(2)};
-  urlScores.push(scoreEntry);
-
-  // 3. Copy share link
-  const url=buildShareUrl();
-  try{await navigator.clipboard.writeText(url);}catch(e){}
-
-  $('submitStatus').innerHTML='Score saved! <strong>Share link copied</strong> - send it to friends so they can see your score and add theirs.';
-  $('submitStatus').style.color='var(--green)';
-  $('submitScoreBtn').disabled=false;
-
-  // Update leaderboard with URL scores
-  renderUrlLeaderboard();
+document.querySelectorAll('.bb').forEach(bb=>{
+  bb.addEventListener('click',()=>{if(rolling)return;const k=bb.dataset.bet;if(balance>=chipVal){balance-=chipVal;bets[k]=(bets[k]||0)+chipVal;updateUI()}});
 });
-
-// ─── CHART ───
-function renderChart(hist,startBR){
-  const canvas=$('chartCanvas');const ctx=canvas.getContext('2d');
-  const rect=canvas.parentElement.getBoundingClientRect();
-  canvas.width=rect.width*2;canvas.height=rect.height*2;ctx.scale(2,2);
-  const W=rect.width,H=rect.height,pad=25;
-  ctx.clearRect(0,0,W,H);
-  if(hist.length<2)return;
-  let mn=Infinity,mx=-Infinity;
-  hist.forEach(v=>{if(v<mn)mn=v;if(v>mx)mx=v;});
-  const range=mx-mn||1;
-  // Grid
-  ctx.strokeStyle='rgba(255,255,255,.06)';ctx.lineWidth=.5;
-  for(let i=0;i<=4;i++){const y=pad+(H-pad*2)*(i/4);ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(W-pad,y);ctx.stroke();}
-  // Start line
-  const sy=pad+(H-pad*2)*(1-(startBR-mn)/range);
-  ctx.strokeStyle='rgba(255,255,255,.15)';ctx.setLineDash([4,4]);
-  ctx.beginPath();ctx.moveTo(pad,sy);ctx.lineTo(W-pad,sy);ctx.stroke();ctx.setLineDash([]);
-  // Line
-  ctx.strokeStyle='#ffbd39';ctx.lineWidth=1.5;ctx.beginPath();
-  for(let i=0;i<hist.length;i++){
-    const x=pad+(W-pad*2)*(i/(hist.length-1));
-    const y=pad+(H-pad*2)*(1-(hist[i]-mn)/range);
-    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-  }
-  ctx.stroke();
-  // Labels
-  ctx.fillStyle='rgba(255,255,255,.4)';ctx.font='10px sans-serif';ctx.textAlign='right';
-  for(let i=0;i<=4;i++){const v=mx-range*(i/4);ctx.fillText('$'+v.toFixed(0),pad-3,pad+(H-pad*2)*(i/4)+3);}
-}
-
-function renderDist(counts,total){
-  const max=Math.max(1,...Object.values(counts));
-  let html='';
-  for(let i=2;i<=12;i++){
-    const pct=total?(counts[i]/total*100).toFixed(1):0;
-    const w=max?(counts[i]/max*100):0;
-    html+=`<div class="chart-bar"><span class="bar-label">${i}</span><div class="bar" style="width:${w}%;min-width:2px"></div><span class="bar-val">${counts[i]||0} (${pct}%)</span></div>`;
-  }
-  $('rollDist').innerHTML=html;
-}
-
-// ─── EVENTS ───
-$('runBtn').addEventListener('click',runSimulation);
-
-// Ref toggle
-document.querySelectorAll('.ref-toggle').forEach(t=>t.addEventListener('click',()=>{
-  const p=$(t.id.replace('Toggle','Panel'));
-  p.classList.toggle('open');
-  t.innerHTML=p.classList.contains('open')?'&#9650; Odds & Payouts Reference':'&#9660; Odds & Payouts Reference';
-}));
-
-// Toast
-function showToast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
-
-// ─── URL PARAMS (deep link into room) ───
-function checkURL(){
-  const p=new URLSearchParams(location.search);
-  // Load scores from URL
-  urlScores=parseUrlScores();
-  if(p.has('room')){
-    const code=p.get('room').toUpperCase();
-    const rolls=+p.get('rolls')||500;
-    const bet=+p.get('bet')||5;
-    joinRoom(code,rolls,bet);
-    if(urlScores.length){
-      setTimeout(()=>renderUrlLeaderboard(),500);
-    }
-  }
-}
-
-// ─── INIT ───
-loadRooms();
-checkURL();
+$('clearBtn').addEventListener('click',()=>{
+  const refund=Object.values(bets).reduce((s,v)=>s+v,0);balance+=refund;bets={};
+  document.querySelectorAll('.bb').forEach(b=>b.classList.remove('sel','win-flash','lose-flash'));updateUI();
+});
+updateUI();updatePoint();
 </script>
 </body>
 </html>
