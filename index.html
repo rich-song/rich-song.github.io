@@ -57,9 +57,6 @@ input[type="checkbox"]{width:auto;margin-right:4px}
 
 /* Game */
 .game-top{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
-.dice-strip{display:flex;align-items:center;gap:12px}
-.dice{display:inline-block;width:52px;height:52px;background:linear-gradient(145deg,#ff4040,#cc0000);border-radius:9px;position:relative;box-shadow:0 3px 0 #8b0000,0 5px 14px rgba(0,0,0,.5),inset 0 1px 2px rgba(255,255,255,.25)}
-.dot{position:absolute;width:9px;height:9px;background:radial-gradient(circle at 40% 35%,#fff,#e0e0e0);border-radius:50%;box-shadow:inset 0 1px 2px rgba(0,0,0,.3)}
 .puck{font-weight:700;font-size:.85em;padding:4px 14px;border-radius:50px;font-variant:small-caps;letter-spacing:1px}
 .puck-on{background:radial-gradient(circle at 40% 35%,#fff,#ffd700 50%,#d4a800);color:#1a0a00;border:2px solid #8b6914;box-shadow:0 0 12px rgba(255,215,0,.5)}
 .puck-off{background:linear-gradient(145deg,#555,#333);color:#ccc;border:2px solid #666}
@@ -118,49 +115,25 @@ canvas{width:100%!important;height:100%!important}
 
 /* ──── BUBBLE DOME ──── */
 .bubble-dome-wrap{display:flex;justify-content:center;margin:16px 0 8px}
-.bubble-dome{position:relative;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle at 40% 30%,rgba(255,255,255,.12),rgba(255,255,255,.03) 50%,rgba(0,0,0,.25) 100%);border:4px solid rgba(255,255,255,.1);box-shadow:0 0 50px rgba(255,215,0,.08),inset 0 -30px 50px rgba(0,0,0,.35),inset 0 10px 30px rgba(255,255,255,.06);overflow:hidden}
-.bubble-dome::before{content:'';position:absolute;top:8%;left:18%;width:35%;height:20%;background:radial-gradient(ellipse,rgba(255,255,255,.18),transparent);border-radius:50%;transform:rotate(-15deg);pointer-events:none}
-.bubble-dome::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,255,255,.05);pointer-events:none}
-.dome-dice{position:absolute;display:flex;gap:10px;left:50%;top:50%;transform:translate(-50%,-50%)}
-.dome-dice .dice{width:48px;height:48px;border-radius:8px;transition:none}
-.dome-dice .dice.bubbling{animation:bubbleBounce 1.8s ease-in-out infinite}
-.dome-dice .dice:nth-child(2).bubbling{animation-delay:.3s}
-@keyframes bubbleBounce{
-  0%{transform:translateY(0) rotate(0deg)}
-  15%{transform:translateY(-35px) rotate(12deg)}
-  30%{transform:translateY(5px) rotate(-5deg)}
-  45%{transform:translateY(-20px) rotate(8deg)}
-  60%{transform:translateY(3px) rotate(-3deg)}
-  75%{transform:translateY(-10px) rotate(4deg)}
-  100%{transform:translateY(0) rotate(0deg)}
-}
-/* Floating bubbles inside dome */
-.dome-bub{position:absolute;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.2),rgba(255,255,255,.03));pointer-events:none;animation:domeBubble linear infinite}
-@keyframes domeBubble{
-  0%{transform:translateY(0) scale(1);opacity:.6}
-  50%{transform:translateY(-60px) scale(1.1);opacity:.4}
-  100%{transform:translateY(-120px) scale(.6);opacity:0}
-}
-.dome-total{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);font-size:2em;font-weight:800;color:var(--gold);text-shadow:0 0 20px rgba(255,215,0,.6),0 2px 4px rgba(0,0,0,.8);z-index:5}
-@keyframes bubbleBurst{
-  0%{transform:translateY(0) rotate(0) scale(1)}
-  10%{transform:translateY(-50px) rotate(20deg) scale(1.2)}
-  25%{transform:translateY(10px) rotate(-15deg) scale(.9)}
-  40%{transform:translateY(-30px) rotate(10deg) scale(1.1)}
-  55%{transform:translateY(5px) rotate(-5deg) scale(.95)}
-  70%{transform:translateY(-12px) rotate(3deg) scale(1.02)}
-  85%{transform:translateY(2px) rotate(-1deg) scale(1)}
-  100%{transform:translateY(0) rotate(0) scale(1)}
-}
-@keyframes totalFlash{
-  0%{transform:translateX(-50%) scale(1);opacity:.5}
-  50%{transform:translateX(-50%) scale(1.4);opacity:1;text-shadow:0 0 30px rgba(255,215,0,.9)}
-  100%{transform:translateX(-50%) scale(1);opacity:1}
-}
-.dome-label{text-align:center;font-size:.7em;color:var(--text2);margin-top:6px;font-style:italic}
-
+.bubble-dome-outer{position:relative}
+.bubble-dome{position:relative;width:240px;height:240px;border-radius:50%;background:radial-gradient(ellipse at 50% 100%,rgba(20,20,20,.95) 0%,rgba(30,30,40,.6) 30%,rgba(60,60,80,.15) 60%,rgba(100,100,120,.05) 100%);border:5px solid rgba(180,180,200,.15);box-shadow:0 0 60px rgba(0,0,0,.5),0 0 20px rgba(100,100,140,.1),inset 0 -40px 60px rgba(0,0,0,.6),inset 0 20px 40px rgba(255,255,255,.04);overflow:hidden}
+/* Glass highlight - top left arc */
+.bubble-dome::before{content:'';position:absolute;top:6%;left:12%;width:40%;height:25%;background:radial-gradient(ellipse at 50% 50%,rgba(255,255,255,.15),rgba(255,255,255,.03) 70%,transparent);border-radius:50%;transform:rotate(-20deg);pointer-events:none;z-index:10}
+/* Secondary highlight - small dot */
+.bubble-dome::after{content:'';position:absolute;top:15%;right:22%;width:8%;height:6%;background:radial-gradient(circle,rgba(255,255,255,.12),transparent);border-radius:50%;pointer-events:none;z-index:10}
+/* Base plate */
+.dome-base{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:200px;height:30px;background:linear-gradient(180deg,#444,#222);border-radius:0 0 100px 100px;border:2px solid #555;box-shadow:0 4px 12px rgba(0,0,0,.6);z-index:2}
+.dome-base::before{content:'';position:absolute;top:0;left:10%;right:10%;height:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent)}
+/* Canvas for physics dice */
+.dome-canvas{position:absolute;inset:0;z-index:5}
+/* Total display below dome */
+.dome-result{text-align:center;margin-top:10px;min-height:60px}
+.dome-total-num{font-size:2.4em;font-weight:800;color:var(--gold);text-shadow:0 0 20px rgba(255,215,0,.5),0 2px 4px rgba(0,0,0,.8);transition:transform .2s}
+.dome-total-num.flash{animation:totalPop .5s ease}
+@keyframes totalPop{0%{transform:scale(1)}40%{transform:scale(1.5);text-shadow:0 0 40px rgba(255,215,0,.9)}100%{transform:scale(1)}}
+.dome-msg{font-size:.72em;color:var(--text2);font-style:italic;margin-top:2px}
 /* Game info bar below dome */
-.game-info-bar{display:flex;justify-content:center;align-items:center;gap:16px;flex-wrap:wrap;margin:8px 0}
+.game-info-bar{display:flex;justify-content:center;align-items:center;gap:16px;flex-wrap:wrap;margin:10px 0}
 
 .copy-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:linear-gradient(180deg,#ffd700,#b8860b);color:#1a0a00;padding:10px 24px;border-radius:8px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;border:2px solid #8b6914;box-shadow:0 4px 16px rgba(255,215,0,.3)}
 .copy-toast.show{opacity:1}
@@ -217,15 +190,15 @@ canvas{width:100%!important;height:100%!important}
 <div class="view" id="gameView">
 <div class="panel">
 <div class="bubble-dome-wrap">
-<div>
+<div class="bubble-dome-outer">
 <div class="bubble-dome" id="bubbleDome">
-<div class="dome-dice">
-<div class="dice bubbling" id="die1"></div>
-<div class="dice bubbling" id="die2"></div>
+<canvas class="dome-canvas" id="domeCanvas"></canvas>
 </div>
-<div class="dome-total" id="gTotal">-</div>
+<div class="dome-base"></div>
+<div class="dome-result">
+<div class="dome-total-num" id="gTotal">-</div>
+<div class="dome-msg" id="domeMsg">Run simulation to shoot the dice</div>
 </div>
-<div class="dome-label">Bubble Craps</div>
 </div>
 </div>
 <div class="game-info-bar">
@@ -629,27 +602,183 @@ $('shareBtn').addEventListener('click',()=>{
   navigator.clipboard.writeText(url).then(()=>showToast('Link copied with all scores!')).catch(()=>{});
 });
 
-// ─── DICE ───
-const dotPos={1:[[50,50]],2:[[25,25],[75,75]],3:[[25,25],[50,50],[75,75]],4:[[25,25],[75,25],[25,75],[75,75]],5:[[25,25],[75,25],[50,50],[25,75],[75,75]],6:[[25,25],[75,25],[25,50],[75,50],[25,75],[75,75]]};
-function drawDie(el,val){el.innerHTML='';(dotPos[val]||[]).forEach(([x,y])=>{const d=document.createElement('div');d.className='dot';d.style.left=(x-8)+'%';d.style.top=(y-8)+'%';el.appendChild(d);});}
-drawDie($('die1'),1);drawDie($('die2'),2);
+// ─── BUBBLE DOME PHYSICS DICE ───
+const domeCanvas=$('domeCanvas');
+const dCtx=domeCanvas?domeCanvas.getContext('2d'):null;
+const DOME_SIZE=240;
+const DOME_R=DOME_SIZE/2;
+const DIE_SZ=32;
+const GRAVITY=0.35;
+const BOUNCE=0.55;
+const FRICTION=0.985;
+const AIR_FRICTION=0.997;
+const dotPos={1:[[.5,.5]],2:[[.25,.25],[.75,.75]],3:[[.25,.25],[.5,.5],[.75,.75]],4:[[.25,.25],[.75,.25],[.25,.75],[.75,.75]],5:[[.25,.25],[.75,.25],[.5,.5],[.25,.75],[.75,.75]],6:[[.25,.25],[.75,.25],[.25,.5],[.75,.5],[.25,.75],[.75,.75]]};
 
-// ─── BUBBLE DOME PARTICLES ───
-(function initDomeBubbles(){
-  const dome=$('bubbleDome');if(!dome)return;
-  function spawnBub(){
-    const b=document.createElement('div');b.className='dome-bub';
-    const s=Math.random()*12+4;
-    b.style.width=s+'px';b.style.height=s+'px';
-    b.style.left=(Math.random()*70+15)+'%';
-    b.style.bottom=(Math.random()*20)+'%';
-    b.style.animationDuration=(Math.random()*3+2)+'s';
-    dome.appendChild(b);
-    b.addEventListener('animationend',()=>b.remove());
+// Dice state: two dice with physics
+const dice=[
+  {x:DOME_R-25,y:DOME_R+45,vx:0,vy:0,rot:0,vr:0,val:1,settled:true},
+  {x:DOME_R+25,y:DOME_R+45,vx:0,vy:0,rot:0,vr:0,val:2,settled:true}
+];
+let domeAnimating=false;
+let bubbles=[];
+
+function initDomeCanvas(){
+  if(!domeCanvas)return;
+  const dpr=window.devicePixelRatio||1;
+  domeCanvas.width=DOME_SIZE*dpr;domeCanvas.height=DOME_SIZE*dpr;
+  domeCanvas.style.width=DOME_SIZE+'px';domeCanvas.style.height=DOME_SIZE+'px';
+  dCtx.scale(dpr,dpr);
+}
+initDomeCanvas();
+
+// Draw a single die on canvas
+function drawCanvasDie(ctx,d){
+  ctx.save();
+  ctx.translate(d.x,d.y);
+  ctx.rotate(d.rot);
+  const s=DIE_SZ;const hs=s/2;
+  // Die body
+  ctx.fillStyle='#cc0000';
+  ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=6;ctx.shadowOffsetY=2;
+  const r=4;
+  ctx.beginPath();
+  ctx.moveTo(-hs+r,-hs);ctx.lineTo(hs-r,-hs);ctx.quadraticCurveTo(hs,-hs,hs,-hs+r);
+  ctx.lineTo(hs,hs-r);ctx.quadraticCurveTo(hs,hs,hs-r,hs);
+  ctx.lineTo(-hs+r,hs);ctx.quadraticCurveTo(-hs,hs,-hs,hs-r);
+  ctx.lineTo(-hs,-hs+r);ctx.quadraticCurveTo(-hs,-hs,-hs+r,-hs);
+  ctx.closePath();ctx.fill();
+  // Top highlight
+  ctx.shadowColor='transparent';
+  const grad=ctx.createLinearGradient(-hs,-hs,hs,hs);
+  grad.addColorStop(0,'rgba(255,100,100,.35)');grad.addColorStop(.5,'rgba(255,255,255,.08)');grad.addColorStop(1,'rgba(0,0,0,.15)');
+  ctx.fillStyle=grad;ctx.fill();
+  // Pips
+  ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,0,0,.3)';ctx.shadowBlur=1;ctx.shadowOffsetY=1;
+  (dotPos[d.val]||[]).forEach(([px,py])=>{
+    ctx.beginPath();
+    ctx.arc(-hs+px*s,-hs+py*s,3.2,0,Math.PI*2);
+    ctx.fill();
+  });
+  ctx.restore();
+}
+
+// Draw air bubbles
+function drawBubbles(ctx){
+  bubbles.forEach(b=>{
+    ctx.save();
+    ctx.globalAlpha=b.alpha;
+    const g=ctx.createRadialGradient(b.x-b.r*.3,b.y-b.r*.3,0,b.x,b.y,b.r);
+    g.addColorStop(0,'rgba(255,255,255,.25)');g.addColorStop(.5,'rgba(200,220,255,.08)');g.addColorStop(1,'rgba(200,220,255,.02)');
+    ctx.fillStyle=g;
+    ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  });
+}
+
+// Constrain die to circular dome
+function constrainToDome(d){
+  const dx=d.x-DOME_R,dy=d.y-DOME_R;
+  const dist=Math.sqrt(dx*dx+dy*dy);
+  const maxR=DOME_R-DIE_SZ/2-6;
+  if(dist>maxR){
+    const nx=dx/dist,ny=dy/dist;
+    d.x=DOME_R+nx*maxR;d.y=DOME_R+ny*maxR;
+    // Reflect velocity off dome wall
+    const dot=d.vx*nx+d.vy*ny;
+    d.vx-=2*dot*nx;d.vy-=2*dot*ny;
+    d.vx*=BOUNCE;d.vy*=BOUNCE;
+    d.vr+=(Math.random()-.5)*0.3;
   }
-  setInterval(spawnBub,400);
-  for(let i=0;i<6;i++)setTimeout(spawnBub,i*200);
-})();
+}
+
+// Physics step
+function stepDice(){
+  dice.forEach(d=>{
+    if(d.settled)return;
+    d.vy+=GRAVITY;
+    d.vx*=AIR_FRICTION;d.vy*=AIR_FRICTION;
+    d.x+=d.vx;d.y+=d.vy;
+    d.rot+=d.vr;
+    d.vr*=FRICTION;
+    constrainToDome(d);
+    // Settle check - bottom of dome
+    const speed=Math.sqrt(d.vx*d.vx+d.vy*d.vy);
+    if(speed<0.3&&d.y>DOME_R+30){
+      d.vx=0;d.vy=0;d.vr=0;
+      d.rot=Math.round(d.rot/(Math.PI/2))*(Math.PI/2); // snap rotation
+      d.settled=true;
+    }
+  });
+  // Update bubbles
+  bubbles=bubbles.filter(b=>{
+    b.y-=b.speed;b.x+=Math.sin(b.t)*0.3;b.t+=0.05;
+    b.alpha-=0.006;
+    return b.alpha>0&&b.y>0;
+  });
+}
+
+// Render loop
+function renderDome(){
+  if(!dCtx)return;
+  dCtx.clearRect(0,0,DOME_SIZE,DOME_SIZE);
+  // Dome interior shadow
+  const ig=dCtx.createRadialGradient(DOME_R,DOME_R+20,10,DOME_R,DOME_R,DOME_R);
+  ig.addColorStop(0,'rgba(0,0,0,0)');ig.addColorStop(.7,'rgba(0,0,0,0)');ig.addColorStop(1,'rgba(0,0,0,.3)');
+  dCtx.fillStyle=ig;
+  dCtx.beginPath();dCtx.arc(DOME_R,DOME_R,DOME_R-3,0,Math.PI*2);dCtx.fill();
+  drawBubbles(dCtx);
+  dice.forEach(d=>drawCanvasDie(dCtx,d));
+  if(domeAnimating||bubbles.length>0||!dice[0].settled||!dice[1].settled){
+    requestAnimationFrame(()=>{stepDice();renderDome();});
+  }
+}
+
+// Blast dice up (like air jet)
+function blastDice(finalV1,finalV2){
+  domeAnimating=true;
+  $('domeMsg').textContent='Shooting...';
+  // Spawn air bubbles from bottom
+  for(let i=0;i<25;i++){
+    bubbles.push({
+      x:DOME_R+(Math.random()-0.5)*60,
+      y:DOME_R+70+Math.random()*20,
+      r:Math.random()*8+3,
+      speed:Math.random()*2.5+1.5,
+      alpha:0.5+Math.random()*0.3,
+      t:Math.random()*Math.PI*2
+    });
+  }
+  // Randomize initial faces during flight
+  dice[0].val=Math.ceil(Math.random()*6);dice[1].val=Math.ceil(Math.random()*6);
+  // Launch dice upward with random horizontal
+  dice[0].settled=false;dice[1].settled=false;
+  dice[0].vx=(Math.random()-0.5)*6;dice[0].vy=-(Math.random()*8+12);dice[0].vr=(Math.random()-0.5)*0.6;
+  dice[1].vx=(Math.random()-0.5)*6;dice[1].vy=-(Math.random()*8+11);dice[1].vr=(Math.random()-0.5)*0.6;
+  // Start at bottom
+  dice[0].x=DOME_R-18;dice[0].y=DOME_R+55;
+  dice[1].x=DOME_R+18;dice[1].y=DOME_R+55;
+  // Tumble faces mid-flight
+  let tumbleCount=0;
+  const tumbleIv=setInterval(()=>{
+    if(!dice[0].settled)dice[0].val=Math.ceil(Math.random()*6);
+    if(!dice[1].settled)dice[1].val=Math.ceil(Math.random()*6);
+    // Add more bubbles during flight
+    if(tumbleCount<8){
+      bubbles.push({x:DOME_R+(Math.random()-0.5)*80,y:DOME_R+60,r:Math.random()*5+2,speed:Math.random()*2+1,alpha:0.3,t:Math.random()*6});
+    }
+    tumbleCount++;
+    if(dice[0].settled&&dice[1].settled){
+      clearInterval(tumbleIv);
+      dice[0].val=finalV1;dice[1].val=finalV2;
+      domeAnimating=false;
+      renderDome(); // final frame
+    }
+  },80);
+  stepDice();renderDome();
+}
+
+// Initial render - dice resting at bottom
+renderDome();
 
 // ─── PAYOUT HELPERS ───
 function passOddsPay(pt,b){
@@ -901,20 +1030,15 @@ function runSimulation(){
     bankrollHist.push(bankroll);
   }
 
-  // Update dice display with burst animation
-  const d1El=$('die1'),d2El=$('die2');
-  d1El.classList.remove('bubbling');d2El.classList.remove('bubbling');
-  d1El.style.animation='none';d2El.style.animation='none';
-  void d1El.offsetHeight;
-  d1El.style.animation='bubbleBurst .8s ease-out';d2El.style.animation='bubbleBurst .8s ease-out .1s';
-  drawDie(d1El,lastD1);drawDie(d2El,lastD2);
-  $('gTotal').textContent=lastTotal;
-  $('gTotal').style.animation='none';void $('gTotal').offsetHeight;
-  $('gTotal').style.animation='totalFlash .6s ease';
+  // Update dice display with bubble craps blast
+  blastDice(lastD1,lastD2);
+  const totalEl=$('gTotal');
+  totalEl.textContent=lastTotal;
+  totalEl.classList.remove('flash');void totalEl.offsetHeight;totalEl.classList.add('flash');
   $('gRollNum').textContent=Math.min(totalRolls,bankrollHist.length-1);
   if(phase==='point'){$('gPuck').className='puck puck-on';$('gPuck').textContent='POINT: '+point;}
   else{$('gPuck').className='puck puck-off';$('gPuck').textContent='OFF';}
-  setTimeout(()=>{d1El.classList.add('bubbling');d2El.classList.add('bubbling');d1El.style.animation='';d2El.style.animation='';},900);
+  $('domeMsg').textContent=lastTotal===7?'Seven out!':phase==='point'?'Point is '+point:'Natural!';
 
   const result={bankrollStart,bankrollEnd:bankroll,netPL:bankroll-bankrollStart,wins,losses,peak,low,bankrollHist,rollCounts,totalRolls:bankrollHist.length-1};
   showResults(result,strat);
